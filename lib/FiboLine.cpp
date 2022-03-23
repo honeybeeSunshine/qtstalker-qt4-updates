@@ -28,17 +28,20 @@
 #include <Q3PointArray>
 #include <QPixmap>
 
-FiboLine::FiboLine ()
+#include <qdebug.h>
+
+FiboLine::FiboLine (int d)
 {
   defaultColor.setNamedColor("red");
   helpFile = "fiboline.html";
-  extend = FALSE;
+  extend = TRUE;
+  autobar = TRUE;
   line1 = 0.382;
   line2 = 0.5;
   line3 = 0.618;
-  line4 = 0;
-  line5 = 0;
-  line6 = 0;
+  line4 = -0.382;
+  line5 = -0.5;
+  line6 = -0.618;
   startDate = QDateTime::currentDateTime();
   endDate = startDate;
   type = "FiboLine";
@@ -54,6 +57,11 @@ FiboLine::FiboLine ()
   l5Label = "Line 5";
   l6Label = "Line 6";
   extendLabel = "Extend";
+  autobarLabel = "Autobar";
+
+  // qDebug() << d;
+  interval = d;
+  intervalLabel = "Bar Length";
 
   RcFile rcfile;
   rcfile.loadFont(RcFile::PlotFont,font);
@@ -71,15 +79,22 @@ void FiboLine::draw (QPixmap &buffer, Scaler &scaler, int startIndex, int pixels
   painter.begin(&buffer);
   painter.setFont(font);
 
-  int x2 = data->getX(startDate);
+//try to make fibo's extend both ways
+  QDateTime dt = startDate;
+  if (extend)
+    data->getDate(0, dt);
+//  int x2 = data->getX(startDate);
+  int x2 = data->getX(dt);
   if (x2 == -1)
     return;
+
 
   int x = startX + (x2 * pixelspace) - (startIndex * pixelspace);
   if (x == -1)
     return;
 
-  QDateTime dt = endDate;
+//  QDateTime dt = endDate;
+  dt = endDate;
   if (extend)
     data->getDate(data->count() - 1, dt);
 
@@ -90,6 +105,11 @@ void FiboLine::draw (QPixmap &buffer, Scaler &scaler, int startIndex, int pixels
   x2 = startX + (x2 * pixelspace) - (startIndex * pixelspace);
   if (x2 == -1)
     return;
+
+  //adjust where the text, handles are drawn for extend etc.
+  int ti = x;
+  if (extend == TRUE)
+    ti = 0;
 
   painter.setPen(getColor());
 
@@ -104,7 +124,7 @@ void FiboLine::draw (QPixmap &buffer, Scaler &scaler, int startIndex, int pixels
       double r = getY(getLine(loop), getHigh(), getLow());
       int y = scaler.convertToY(r);
       painter.drawLine (x, y, x2, y);
-      painter.drawText(x, y - 1, QString::number(getLine(loop) * 100) + "% - " + QString::number(r), -1);
+      painter.drawText(ti, y - 1, QString::number(getLine(loop) * 100) + "% - " + QString::number(r), -1);
 
       array.putPoints(0, 4, x, y - 4, x, y + 4, x2, y + 4, x2, y - 4);
       setSelectionArea(new QRegion(array));
@@ -115,7 +135,7 @@ void FiboLine::draw (QPixmap &buffer, Scaler &scaler, int startIndex, int pixels
   int y = scaler.convertToY(getLow());
   painter.drawLine (x, y, x2, y);
   // if (co->getStatus() == FiboLineObject::Selected)
-  painter.drawText(x, y - 1, "0% - " + QString::number(getLow()), -1);
+  painter.drawText(ti, y - 1, "0% - " + QString::number(getLow()), -1);
 
   // store the selectable area the low line occupies
   array.putPoints(0, 4, x, y - 4, x, y + 4, x2, y + 4, x2, y - 4);
@@ -125,7 +145,7 @@ void FiboLine::draw (QPixmap &buffer, Scaler &scaler, int startIndex, int pixels
   int y2 = scaler.convertToY(getHigh());
   painter.drawLine (x, y2, x2, y2);
   // if (co->getStatus() == FiboLineObject::Selected)
-  painter.drawText(x, y2 - 1, "100% - " + QString::number(getHigh()), -1);
+  painter.drawText(ti, y2 - 1, "100% - " + QString::number(getHigh()), -1);
 
   // store the selectable area the high line occupies
   array.putPoints(0, 4, x, y2 - 4, x, y2 + 4, x2, y2 + 4, x2, y2 - 4);
@@ -137,12 +157,12 @@ void FiboLine::draw (QPixmap &buffer, Scaler &scaler, int startIndex, int pixels
 
     //bottom left corner
     y = scaler.convertToY(getLow());
-    setGrabHandle(new QRegion(x,
+    setGrabHandle(new QRegion(ti,
              		      y - (HANDLE_WIDTH / 2),
 			      HANDLE_WIDTH,
 			      HANDLE_WIDTH,
 			      QRegion::Rectangle));
-    painter.fillRect(x, y - (HANDLE_WIDTH / 2), HANDLE_WIDTH, HANDLE_WIDTH, getColor());
+    painter.fillRect(ti, y - (HANDLE_WIDTH / 2), HANDLE_WIDTH, HANDLE_WIDTH, getColor());
 
     //top right corner
     y2 = scaler.convertToY(getHigh());
@@ -193,6 +213,7 @@ void FiboLine::prefDialog ()
   QString hl = tr("High");
   QString ll = tr("Low");
   QString el = tr("Extend");
+  QString ab = tr("Use Bars");
 
   PrefDialog *dialog = new PrefDialog();
   dialog->setCaption(tr("Edit FiboLine"));
@@ -202,6 +223,7 @@ void FiboLine::prefDialog ()
   dialog->addDoubleItem(hl, pl, getHigh());
   dialog->addDoubleItem(ll, pl, getLow());
   dialog->addCheckItem(el, pl, extend);
+  dialog->addCheckItem(ab, pl, autobar);
   dialog->addCheckItem(sd, pl, FALSE);
 
   pl = tr("Levels");
@@ -227,6 +249,12 @@ void FiboLine::prefDialog ()
     high = dialog->getDouble(hl);
     low = dialog->getDouble(ll);
     extend = dialog->getCheck(el);
+    autobar = dialog->getCheck(ab);
+
+    // //if autobar changes to TRUE, need to adjust lines here?
+    // if (autobar == TRUE){
+    //   ...
+    // }
 
     setSaveFlag(TRUE);
 
@@ -266,9 +294,10 @@ COBase::Status FiboLine::pointerClick (QPoint &point, QDateTime &x, double y)
   switch (status)
   {
     case None:
-      if (isSelected(point))
+      if (isSelected(point)) //selecting existing fiboline
       {
         status = Selected;
+        ty = getHigh(); //needed to initialize this...
         emit signalDraw();
       }
       break;
@@ -297,10 +326,11 @@ COBase::Status FiboLine::pointerClick (QPoint &point, QDateTime &x, double y)
       emit message(tr("Select FiboLine low point..."));
       break;
     case ClickWait2:
-      if (x <= tx)
-        break;
-      if (y >= ty)
-        break;
+//removed for good reason
+//      if (x <= tx)
+//        break;
+//     if (y >= ty)
+//        break;
       status = None;
       emit message("");
       break;
@@ -311,16 +341,36 @@ COBase::Status FiboLine::pointerClick (QPoint &point, QDateTime &x, double y)
   return status;
 }
 
+//moving mouse cursor for 2nd line or adjusting already placed fiboline
 void FiboLine::pointerMoving (QPixmap &, QPoint &, QDateTime &x, double y)
 {
-  if (status == ClickWait2)
+  if (status == ClickWait2) // first time drawing this object, placing second line
   {
+    //press ESC to cancel drawing?? not here I guess
+
     startDate = tx;
     endDate = x;
     high = ty;
     low = y;
+
+    //use bar values
+    if (autobar == TRUE) {
+      if (low > high) {
+        high = data->getLow(data->getX(startDate));
+        low = data->getHigh(data->getX(endDate));  
+      } else {
+        high = data->getHigh(data->getX(startDate));
+        low = data->getLow(data->getX(endDate));
+      }
+    }
+
     setSaveFlag(TRUE);
-    setColor(defaultColor);
+    //		defaultColor.setNamedColor("red");
+    //    setColor(defaultColor);
+  	if (high > low)
+      setColor(QColor(41,124,0,255)); //find support with green
+  	else
+  		setColor(QColor(140,0,0,255)); //find resistance with red
     emit signalDraw();
     QString s = x.toString("yyyy-MM-dd hh:mm:ss") + " " + QString::number(y);
     emit message(s);
@@ -331,43 +381,49 @@ void FiboLine::pointerMoving (QPixmap &, QPoint &, QDateTime &x, double y)
   if (! moveFlag || status != Moving)
     return;
 
-  if (moveFlag == 1)
+  // moving the lines after drawing
+  if (moveFlag == 1) //moving 0% (end, "low") line
   {
-    // bottom left corner
-    if (x >= endDate)
-      return;
-
-    if (y >= getHigh())
-      return;
-
-    startDate = x;
-    low = y;
-    setSaveFlag(TRUE);
-
-    emit signalDraw();
-
-    QString s = x.toString("yyyy-MM-dd hh:mm:ss") + " " + QString::number(y);
-    emit message(s);
-  }
-  else
-  {
-    //top right corner
-    if (x <= startDate)
-      return;
-
-    if (y <= getLow())
-      return;
-
     endDate = x;
+    high = ty;
+    low = y;
+    //use bar values
+    if (autobar == TRUE) {
+      if (low > high)
+        low = data->getHigh(data->getX(endDate));  
+      else
+        low = data->getLow(data->getX(endDate));
+    }
+  } else { //moving 100% (start, "high") line
+    startDate = x;
     high = y;
-    setSaveFlag(TRUE);
+    //use bar values
+    if (autobar == TRUE) {
+      if (low > high)
+        high = data->getLow(data->getX(startDate));  
+      else
+        high = data->getHigh(data->getX(startDate));
+    }
 
-    emit signalDraw();
-
-    QString s = x.toString("yyyy-MM-dd hh:mm:ss") + " " + QString::number(y);
-    emit message(s);
+    // qDebug() << low;
   }
+
+  // setColor(defaultColor);
+  if ((color.name() == "#297c00") | (color.name() == "#8c0000")) 
+  {
+  	if (high > low)
+      setColor(QColor(41,124,0,255)); //find support with green
+  	else
+  		setColor(QColor(140,0,0,255)); //find resistance with red
+  }
+
+  setSaveFlag(TRUE);
+  emit signalDraw();
+  QString s = x.toString("yyyy-MM-dd hh:mm:ss") + " " + QString::number(y);
+  emit message(s);
 }
+
+
 
 void FiboLine::loadDefaults ()
 {
@@ -473,7 +529,11 @@ void FiboLine::getSettings (Setting &set)
   set.setData(l6Label, s);
   s = QString::number(extend);
   set.setData(extendLabel, s);
+  s = QString::number(autobar);
+  set.setData(autobarLabel, s);
   set.setData(typeLabel, type);
+  s = QString::number(interval);
+  set.setData(intervalLabel, s);
 }
 
 void FiboLine::setSettings (Setting &set)
@@ -499,6 +559,8 @@ void FiboLine::setSettings (Setting &set)
   line5 = set.getDouble(l5Label);
   line6 = set.getDouble(l6Label);
   extend = set.getInt(extendLabel);
+  interval = set.getInt(intervalLabel);
+  autobar = set.getInt(autobarLabel);
 }
 
 int FiboLine::isGrabSelected (QPoint point)

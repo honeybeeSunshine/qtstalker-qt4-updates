@@ -76,6 +76,7 @@ class IndicatorPlot : public QWidget
       ClickWait,
       COSelected,
       Moving
+      // pDateSelect
     };
 
     IndicatorPlot(QWidget *, DBIndex *);
@@ -113,6 +114,8 @@ class IndicatorPlot : public QWidget
     void drawBar();
     void drawCandle();
     void drawPF();
+
+    void newChartObject(QString);
 
   public slots:
     void draw();
@@ -206,6 +209,8 @@ class IndicatorPlot : public QWidget
     int pixelspace;
     int startIndex;
     int startX;
+
+    bool arrowFlag;
 };
 
 #endif

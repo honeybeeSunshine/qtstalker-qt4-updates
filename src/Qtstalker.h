@@ -72,6 +72,8 @@ class QtstalkerApp : public QMainWindow
     void signalChartPath(QString);
     void signalCrosshairsStatus(bool);
 
+    void signalDifferentFile(QString);
+
   public:
 
     enum chartStatus
@@ -80,11 +82,11 @@ class QtstalkerApp : public QMainWindow
       Chart
     };
 
-    QtstalkerApp();
+    QtstalkerApp(int, char **);
     ~QtstalkerApp();
     void initConfig();
     void initMenuBar();
-    void initToolBar();
+    void initToolBar(int, char **);
     void initGroupNav();
     void initChartNav();
     void initPortfolioNav();
@@ -98,6 +100,7 @@ class QtstalkerApp : public QMainWindow
     void traverse(QString &);
     void loadIndicator(Indicator *);
     void setSliderStart();
+
 
   public slots:
     void slotAbout();

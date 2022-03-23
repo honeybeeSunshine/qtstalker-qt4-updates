@@ -377,6 +377,62 @@ void  Preferences::createCTPage()
   connect(cmpsComboBoxCheck, SIGNAL(stateChanged(int)), this, SLOT(slotModified()));
   grid->addWidget(cmpsComboBoxCheck, i++, j + 1);
 
+  label = new QLabel(tr("Compression custom seconds"), w);
+  grid->addWidget(label, i, j);
+  cmpsCustomBarBtnCheck = new QCheckBox(w);
+  rcfile.loadData(RcFile::ShowCmpsCustomBarBtn, tb);
+  cmpsCustomBarBtnCheck->setChecked(tb);
+  connect(cmpsCustomBarBtnCheck, SIGNAL(stateChanged(int)), this, SLOT(slotModified()));
+  grid->addWidget(cmpsCustomBarBtnCheck, i++, j + 1);
+
+  label = new QLabel(tr("Compression 5 seconds"), w);
+  grid->addWidget(label, i, j);
+  cmps5SBtnCheck = new QCheckBox(w);
+  rcfile.loadData(RcFile::ShowCmps5SBtn, tb);
+  cmps5SBtnCheck->setChecked(tb);
+  connect(cmps5SBtnCheck, SIGNAL(stateChanged(int)), this, SLOT(slotModified()));
+  grid->addWidget(cmps5SBtnCheck, i++, j + 1);
+
+  label = new QLabel(tr("Compression 10 seconds"), w);
+  grid->addWidget(label, i, j);
+  cmps10SBtnCheck = new QCheckBox(w);
+  rcfile.loadData(RcFile::ShowCmps10SBtn, tb);
+  cmps10SBtnCheck->setChecked(tb);
+  connect(cmps10SBtnCheck, SIGNAL(stateChanged(int)), this, SLOT(slotModified()));
+  grid->addWidget(cmps10SBtnCheck, i++, j + 1);
+
+  label = new QLabel(tr("Compression 15 seconds"), w);
+  grid->addWidget(label, i, j);
+  cmps15SBtnCheck = new QCheckBox(w);
+  rcfile.loadData(RcFile::ShowCmps15SBtn, tb);
+  cmps15SBtnCheck->setChecked(tb);
+  connect(cmps15SBtnCheck, SIGNAL(stateChanged(int)), this, SLOT(slotModified()));
+  grid->addWidget(cmps15SBtnCheck, i++, j + 1);
+
+  label = new QLabel(tr("Compression 20 seconds"), w);
+  grid->addWidget(label, i, j);
+  cmps20SBtnCheck = new QCheckBox(w);
+  rcfile.loadData(RcFile::ShowCmps20SBtn, tb);
+  cmps20SBtnCheck->setChecked(tb);
+  connect(cmps20SBtnCheck, SIGNAL(stateChanged(int)), this, SLOT(slotModified()));
+  grid->addWidget(cmps20SBtnCheck, i++, j + 1);
+
+  label = new QLabel(tr("Compression 30 seconds"), w);
+  grid->addWidget(label, i, j);
+  cmps30SBtnCheck = new QCheckBox(w);
+  rcfile.loadData(RcFile::ShowCmps30SBtn, tb);
+  cmps30SBtnCheck->setChecked(tb);
+  connect(cmps30SBtnCheck, SIGNAL(stateChanged(int)), this, SLOT(slotModified()));
+  grid->addWidget(cmps30SBtnCheck, i++, j + 1);
+
+  label = new QLabel(tr("Compression 45 seconds"), w);
+  grid->addWidget(label, i, j);
+  cmps45SBtnCheck = new QCheckBox(w);
+  rcfile.loadData(RcFile::ShowCmps45SBtn, tb);
+  cmps45SBtnCheck->setChecked(tb);
+  connect(cmps45SBtnCheck, SIGNAL(stateChanged(int)), this, SLOT(slotModified()));
+  grid->addWidget(cmps45SBtnCheck, i++, j + 1);
+
   label = new QLabel(tr("Compression 1 Minute"), w);
   grid->addWidget(label, i, j);
   cmps1MBtnCheck = new QCheckBox(w);
@@ -385,13 +441,29 @@ void  Preferences::createCTPage()
   connect(cmps1MBtnCheck, SIGNAL(stateChanged(int)), this, SLOT(slotModified()));
   grid->addWidget(cmps1MBtnCheck, i++, j + 1);
 
-//  label = new QLabel(tr("Compression 2 Minute"), w);
-//  grid->addWidget(label, i, j);
-//  cmps2MBtnCheck = new QCheckBox(w);
-//  rcfile.loadData(RcFile::ShowCmps2MBtn, tb);
-//  cmps2MBtnCheck->setChecked(tb);
-//  connect(cmps2MBtnCheck, SIGNAL(stateChanged(int)), this, SLOT(slotModified()));
-//  grid->addWidget(cmps2MBtnCheck, i++, j + 1);
+  label = new QLabel(tr("Compression 2 Minute"), w);
+  grid->addWidget(label, i, j);
+  cmps2MBtnCheck = new QCheckBox(w);
+  rcfile.loadData(RcFile::ShowCmps2MBtn, tb);
+  cmps2MBtnCheck->setChecked(tb);
+  connect(cmps2MBtnCheck, SIGNAL(stateChanged(int)), this, SLOT(slotModified()));
+  grid->addWidget(cmps2MBtnCheck, i++, j + 1);
+
+  label = new QLabel(tr("Compression 3 Minute"), w);
+  grid->addWidget(label, i, j);
+  cmps3MBtnCheck = new QCheckBox(w);
+  rcfile.loadData(RcFile::ShowCmps3MBtn, tb);
+  cmps3MBtnCheck->setChecked(tb);
+  connect(cmps3MBtnCheck, SIGNAL(stateChanged(int)), this, SLOT(slotModified()));
+  grid->addWidget(cmps3MBtnCheck, i++, j + 1);
+
+  label = new QLabel(tr("Compression 4 Minute"), w);
+  grid->addWidget(label, i, j);
+  cmps4MBtnCheck = new QCheckBox(w);
+  rcfile.loadData(RcFile::ShowCmps4MBtn, tb);
+  cmps4MBtnCheck->setChecked(tb);
+  connect(cmps4MBtnCheck, SIGNAL(stateChanged(int)), this, SLOT(slotModified()));
+  grid->addWidget(cmps4MBtnCheck, i++, j + 1);
 
   label = new QLabel(tr("Compression 5 Minute"), w);
   grid->addWidget(label, i, j);
@@ -401,6 +473,14 @@ void  Preferences::createCTPage()
   connect(cmps5MBtnCheck, SIGNAL(stateChanged(int)), this, SLOT(slotModified()));
   grid->addWidget(cmps5MBtnCheck, i++, j + 1);
 
+  label = new QLabel(tr("Compression 6 Minute"), w);
+  grid->addWidget(label, i, j);
+  cmps6MBtnCheck = new QCheckBox(w);
+  rcfile.loadData(RcFile::ShowCmps6MBtn, tb);
+  cmps6MBtnCheck->setChecked(tb);
+  connect(cmps6MBtnCheck, SIGNAL(stateChanged(int)), this, SLOT(slotModified()));
+  grid->addWidget(cmps6MBtnCheck, i++, j + 1);
+
   label = new QLabel(tr("Compression 10 Minute"), w);
   grid->addWidget(label, i, j);
   cmps10MBtnCheck = new QCheckBox(w);
@@ -408,6 +488,14 @@ void  Preferences::createCTPage()
   cmps10MBtnCheck->setChecked(tb);
   connect(cmps10MBtnCheck, SIGNAL(stateChanged(int)), this, SLOT(slotModified()));
   grid->addWidget(cmps10MBtnCheck, i++, j + 1);
+
+  label = new QLabel(tr("Compression 12 Minute"), w);
+  grid->addWidget(label, i, j);
+  cmps12MBtnCheck = new QCheckBox(w);
+  rcfile.loadData(RcFile::ShowCmps12MBtn, tb);
+  cmps12MBtnCheck->setChecked(tb);
+  connect(cmps12MBtnCheck, SIGNAL(stateChanged(int)), this, SLOT(slotModified()));
+  grid->addWidget(cmps12MBtnCheck, i++, j + 1);
 
   label = new QLabel(tr("Compression 15 Minute"), w);
   grid->addWidget(label, i, j);
@@ -417,13 +505,13 @@ void  Preferences::createCTPage()
   connect(cmps15MBtnCheck, SIGNAL(stateChanged(int)), this, SLOT(slotModified()));
   grid->addWidget(cmps15MBtnCheck, i++, j + 1);
 
-//  label = new QLabel(tr("Compression 20 Minute"), w);
-//  grid->addWidget(label, i, j);
-//  cmps20MBtnCheck = new QCheckBox(w);
-//  rcfile.loadData(RcFile::ShowCmps20MBtn, tb);
-//  cmps20MBtnCheck->setChecked(tb);
-//  connect(cmps20MBtnCheck, SIGNAL(stateChanged(int)), this, SLOT(slotModified()));
-//  grid->addWidget(cmps20MBtnCheck, i++, j + 1);
+  label = new QLabel(tr("Compression 20 Minute"), w);
+  grid->addWidget(label, i, j);
+  cmps20MBtnCheck = new QCheckBox(w);
+  rcfile.loadData(RcFile::ShowCmps20MBtn, tb);
+  cmps20MBtnCheck->setChecked(tb);
+  connect(cmps20MBtnCheck, SIGNAL(stateChanged(int)), this, SLOT(slotModified()));
+  grid->addWidget(cmps20MBtnCheck, i++, j + 1);
 
   label = new QLabel(tr("Compression 30 Minute"), w);
   grid->addWidget(label, i, j);
@@ -433,6 +521,18 @@ void  Preferences::createCTPage()
   connect(cmps30MBtnCheck, SIGNAL(stateChanged(int)), this, SLOT(slotModified()));
   grid->addWidget(cmps30MBtnCheck, i++, j + 1);
 
+  label = new QLabel(tr("Compression 45 Minute"), w);
+  grid->addWidget(label, i, j);
+  cmps45MBtnCheck = new QCheckBox(w);
+  rcfile.loadData(RcFile::ShowCmps45MBtn, tb);
+  cmps45MBtnCheck->setChecked(tb);
+  connect(cmps45MBtnCheck, SIGNAL(stateChanged(int)), this, SLOT(slotModified()));
+  grid->addWidget(cmps45MBtnCheck, i++, j + 1);
+
+  // now fill a second col
+  i = 0;
+  j = 3;
+
   label = new QLabel(tr("Compression 1 Hour"), w);
   grid->addWidget(label, i, j);
   cmps1HBtnCheck = new QCheckBox(w);
@@ -441,21 +541,53 @@ void  Preferences::createCTPage()
   connect(cmps1HBtnCheck, SIGNAL(stateChanged(int)), this, SLOT(slotModified()));
   grid->addWidget(cmps1HBtnCheck, i++, j + 1);
 
-//  label = new QLabel(tr("Compression 2 Hour"), w);
-//  grid->addWidget(label, i, j);
-//  cmps2HBtnCheck = new QCheckBox(w);
-//  rcfile.loadData(RcFile::ShowCmps2HBtn, tb);
-//  cmps2HBtnCheck->setChecked(tb);
-//  connect(cmps2HBtnCheck, SIGNAL(stateChanged(int)), this, SLOT(slotModified()));
-//  grid->addWidget(cmps2HBtnCheck, i++, j + 1);
+  label = new QLabel(tr("Compression 2 Hour"), w);
+  grid->addWidget(label, i, j);
+  cmps2HBtnCheck = new QCheckBox(w);
+  rcfile.loadData(RcFile::ShowCmps2HBtn, tb);
+  cmps2HBtnCheck->setChecked(tb);
+  connect(cmps2HBtnCheck, SIGNAL(stateChanged(int)), this, SLOT(slotModified()));
+  grid->addWidget(cmps2HBtnCheck, i++, j + 1);
 
-//  label = new QLabel(tr("Compression 4 Hour"), w);
-//  grid->addWidget(label, i, j);
-//  cmps4HBtnCheck = new QCheckBox(w);
-//  rcfile.loadData(RcFile::ShowCmps4HBtn, tb);
-//  cmps4HBtnCheck->setChecked(tb);
-//  connect(cmps4HBtnCheck, SIGNAL(stateChanged(int)), this, SLOT(slotModified()));
-//  grid->addWidget(cmps4HBtnCheck, i++, j + 1);
+  label = new QLabel(tr("Compression 3 Hour"), w);
+  grid->addWidget(label, i, j);
+  cmps3HBtnCheck = new QCheckBox(w);
+  rcfile.loadData(RcFile::ShowCmps3HBtn, tb);
+  cmps3HBtnCheck->setChecked(tb);
+  connect(cmps3HBtnCheck, SIGNAL(stateChanged(int)), this, SLOT(slotModified()));
+  grid->addWidget(cmps3HBtnCheck, i++, j + 1);
+
+  label = new QLabel(tr("Compression 4 Hour"), w);
+  grid->addWidget(label, i, j);
+  cmps4HBtnCheck = new QCheckBox(w);
+  rcfile.loadData(RcFile::ShowCmps4HBtn, tb);
+  cmps4HBtnCheck->setChecked(tb);
+  connect(cmps4HBtnCheck, SIGNAL(stateChanged(int)), this, SLOT(slotModified()));
+  grid->addWidget(cmps4HBtnCheck, i++, j + 1);
+
+  label = new QLabel(tr("Compression 6 Hour"), w);
+  grid->addWidget(label, i, j);
+  cmps6HBtnCheck = new QCheckBox(w);
+  rcfile.loadData(RcFile::ShowCmps6HBtn, tb);
+  cmps6HBtnCheck->setChecked(tb);
+  connect(cmps6HBtnCheck, SIGNAL(stateChanged(int)), this, SLOT(slotModified()));
+  grid->addWidget(cmps6HBtnCheck, i++, j + 1);
+
+  label = new QLabel(tr("Compression 8 Hour"), w);
+  grid->addWidget(label, i, j);
+  cmps8HBtnCheck = new QCheckBox(w);
+  rcfile.loadData(RcFile::ShowCmps8HBtn, tb);
+  cmps8HBtnCheck->setChecked(tb);
+  connect(cmps8HBtnCheck, SIGNAL(stateChanged(int)), this, SLOT(slotModified()));
+  grid->addWidget(cmps8HBtnCheck, i++, j + 1);
+
+  label = new QLabel(tr("Compression 12 Hour"), w);
+  grid->addWidget(label, i, j);
+  cmps12HBtnCheck = new QCheckBox(w);
+  rcfile.loadData(RcFile::ShowCmps12HBtn, tb);
+  cmps12HBtnCheck->setChecked(tb);
+  connect(cmps12HBtnCheck, SIGNAL(stateChanged(int)), this, SLOT(slotModified()));
+  grid->addWidget(cmps12HBtnCheck, i++, j + 1);
 
   label = new QLabel(tr("Compression 1 Day"), w);
   grid->addWidget(label, i, j);
@@ -464,6 +596,22 @@ void  Preferences::createCTPage()
   cmps1DBtnCheck->setChecked(tb);
   connect(cmps1DBtnCheck, SIGNAL(stateChanged(int)), this, SLOT(slotModified()));
   grid->addWidget(cmps1DBtnCheck, i++, j + 1);
+
+  label = new QLabel(tr("Compression 2 Day"), w);
+  grid->addWidget(label, i, j);
+  cmps2DBtnCheck = new QCheckBox(w);
+  rcfile.loadData(RcFile::ShowCmps2DBtn, tb);
+  cmps2DBtnCheck->setChecked(tb);
+  connect(cmps2DBtnCheck, SIGNAL(stateChanged(int)), this, SLOT(slotModified()));
+  grid->addWidget(cmps2DBtnCheck, i++, j + 1);
+
+  label = new QLabel(tr("Compression 3 Day"), w);
+  grid->addWidget(label, i, j);
+  cmps3DBtnCheck = new QCheckBox(w);
+  rcfile.loadData(RcFile::ShowCmps3DBtn, tb);
+  cmps3DBtnCheck->setChecked(tb);
+  connect(cmps3DBtnCheck, SIGNAL(stateChanged(int)), this, SLOT(slotModified()));
+  grid->addWidget(cmps3DBtnCheck, i++, j + 1);
 
   label = new QLabel(tr("Compression 1 Week"), w);
   grid->addWidget(label, i, j);
@@ -480,6 +628,38 @@ void  Preferences::createCTPage()
   cmpsMNBtnCheck->setChecked(tb);
   connect(cmpsMNBtnCheck, SIGNAL(stateChanged(int)), this, SLOT(slotModified()));
   grid->addWidget(cmpsMNBtnCheck, i++, j + 1);
+
+  label = new QLabel(tr("Compression 2D w/ wend"), w);
+  grid->addWidget(label, i, j);
+  cmps2DwBtnCheck = new QCheckBox(w);
+  rcfile.loadData(RcFile::ShowCmps2DwBtn, tb);
+  cmps2DwBtnCheck->setChecked(tb);
+  connect(cmps2DwBtnCheck, SIGNAL(stateChanged(int)), this, SLOT(slotModified()));
+  grid->addWidget(cmps2DwBtnCheck, i++, j + 1);
+
+  label = new QLabel(tr("Compression 3D w/ wend"), w);
+  grid->addWidget(label, i, j);
+  cmps3DwBtnCheck = new QCheckBox(w);
+  rcfile.loadData(RcFile::ShowCmps3DwBtn, tb);
+  cmps3DwBtnCheck->setChecked(tb);
+  connect(cmps3DwBtnCheck, SIGNAL(stateChanged(int)), this, SLOT(slotModified()));
+  grid->addWidget(cmps3DwBtnCheck, i++, j + 1);
+
+  label = new QLabel(tr("Compression 5D w/ wend"), w);
+  grid->addWidget(label, i, j);
+  cmps5DwBtnCheck = new QCheckBox(w);
+  rcfile.loadData(RcFile::ShowCmps5DwBtn, tb);
+  cmps5DwBtnCheck->setChecked(tb);
+  connect(cmps5DwBtnCheck, SIGNAL(stateChanged(int)), this, SLOT(slotModified()));
+  grid->addWidget(cmps5DwBtnCheck, i++, j + 1);
+
+  label = new QLabel(tr("Compression 8D w/ wend"), w);
+  grid->addWidget(label, i, j);
+  cmps8DwBtnCheck = new QCheckBox(w);
+  rcfile.loadData(RcFile::ShowCmps8DwBtn, tb);
+  cmps8DwBtnCheck->setChecked(tb);
+  connect(cmps8DwBtnCheck, SIGNAL(stateChanged(int)), this, SLOT(slotModified()));
+  grid->addWidget(cmps8DwBtnCheck, i++, j + 1);
 
   label = new QLabel(tr("BarSpacing spinner"), w);
   grid->addWidget(label, i, j);
@@ -656,11 +836,11 @@ void Preferences::slotSave()
   rcfile.saveData(RcFile::ShowCmps5MBtn, cmps5MBtnCheck->isChecked());
   rcfile.saveData(RcFile::ShowCmps10MBtn, cmps10MBtnCheck->isChecked());
   rcfile.saveData(RcFile::ShowCmps15MBtn, cmps15MBtnCheck->isChecked());
-//  rcfile.saveData(RcFile::ShowCmps20MBtn, cmps20MBtnCheck->isChecked());
+  rcfile.saveData(RcFile::ShowCmps20MBtn, cmps20MBtnCheck->isChecked());
   rcfile.saveData(RcFile::ShowCmps30MBtn, cmps30MBtnCheck->isChecked());
   rcfile.saveData(RcFile::ShowCmps1HBtn, cmps1HBtnCheck->isChecked());
-//  rcfile.saveData(RcFile::ShowCmps2HBtn, cmps2HBtnCheck->isChecked());
-//  rcfile.saveData(RcFile::ShowCmps4HBtn, cmps4HBtnCheck->isChecked());
+  rcfile.saveData(RcFile::ShowCmps2HBtn, cmps2HBtnCheck->isChecked());
+  rcfile.saveData(RcFile::ShowCmps4HBtn, cmps4HBtnCheck->isChecked());
   rcfile.saveData(RcFile::ShowCmps1DBtn, cmps1DBtnCheck->isChecked());
   rcfile.saveData(RcFile::ShowCmps1WBtn, cmps1WBtnCheck->isChecked());
   rcfile.saveData(RcFile::ShowCmpsMNBtn, cmpsMNBtnCheck->isChecked());

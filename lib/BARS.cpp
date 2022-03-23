@@ -99,9 +99,9 @@ BARS::~BARS ()
 
 void BARS::setDefaults ()
 {
-  barUpColor.setNamedColor("#00aa00");
-  barDownColor.setNamedColor("#ee0000");
-  barNeutralColor.setNamedColor("#0088ff");
+  barUpColor.setNamedColor("dimgray");//"#00aa00");
+  barDownColor.setNamedColor("dimgray");//"#ee0000");
+  barNeutralColor.setNamedColor("dimgray");//"#0088ff");
   candleColor.setNamedColor("dimgray");
   label = pluginName;
 

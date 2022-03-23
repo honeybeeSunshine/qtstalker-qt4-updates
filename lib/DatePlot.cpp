@@ -44,6 +44,7 @@ DatePlot::DatePlot (QWidget *w) : QWidget(w)
   startIndex = 0;
   data = 0;
 //  setMouseTracking(TRUE);
+  // setFocusPolicy(Qt::StrongFocus);
   setFocusPolicy(Qt::ClickFocus);
 
   plotFont.setFamily("DejaVu Sans");
@@ -76,17 +77,35 @@ void DatePlot::setData (BarData *l)
 
   switch (interval)
   {
+    // case BarData::CustomBar:
+      // break;
+    case BarData::Second5:
+    case BarData::Second10:
+    case BarData::Second15:
+    case BarData::Second20:
+    case BarData::Second30:
+    case BarData::Second45:
     case BarData::Minute1:
+    case BarData::Minute2:
+    case BarData::Minute3:
+    case BarData::Minute4:
     case BarData::Minute5:
+    case BarData::Minute6:
     case BarData::Minute10:
+    case BarData::Minute12:
     case BarData::Minute15:
+    case BarData::Minute20:
     case BarData::Minute30:
-    case BarData::Minute60:
+    case BarData::Minute45:
+    case BarData::Hour1:
       getMinuteDate();
       break;
     case BarData::WeeklyBar:
+    case BarData::Day5w:
+    case BarData::Day8w:
       getWeeklyDate();
       break;
+    case BarData::CustomBar:
     case BarData::MonthlyBar:
       getMonthlyDate();
       break;

@@ -38,6 +38,7 @@
 #include <qstringlist.h>
 #include <Q3TextStream>
 
+// #include <qdebug.h>
 
 DbPlugin::DbPlugin ()
 {
@@ -425,6 +426,9 @@ void DbPlugin::setBar (Bar &bar)
   dbbar.volume = bar.getVolume();
   dbbar.oi = (int) bar.getOI();
 
+  // qDebug() << key.data;
+  // qDebug() << (char *) s.latin1();
+  // qDebug() << s;
   db->put(db, NULL, &key, &data, 0);
 }
 

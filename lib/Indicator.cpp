@@ -91,6 +91,11 @@ void Indicator::getName (QString &d)
   d = name;
 }
 
+// void Indicator::getDisplayRange (QString &d)
+// {
+//   d = range;
+// }
+
 void Indicator::setType (QString &d)
 {
   type = d;

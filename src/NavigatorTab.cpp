@@ -122,11 +122,11 @@ NavigatorTab::NavigatorTab (QWidget *w, QMainWindow *mw) : QWidget (w)
   Q3Accel *a = new Q3Accel(mw);
   connect(a, SIGNAL(activated(int)), this, SLOT(slotAccel(int)));
   a->insertItem(Qt::CTRL+Qt::Key_C, ChartPanelFocus);
-  a->insertItem(Qt::CTRL+Qt::Key_G, GroupPanelFocus);
-  a->insertItem(Qt::CTRL+Qt::Key_I, IndicatorPanelFocus);
-  a->insertItem(Qt::CTRL+Qt::Key_P, PortfolioPanelFocus);
-  a->insertItem(Qt::CTRL+Qt::Key_T, TestPanelFocus);
-  a->insertItem(Qt::CTRL+Qt::Key_S, ScannerPanelFocus);
+  // a->insertItem(Qt::CTRL+Qt::Key_G, GroupPanelFocus);
+  // a->insertItem(Qt::CTRL+Qt::Key_I, IndicatorPanelFocus);
+  // a->insertItem(Qt::CTRL+Qt::Key_P, PortfolioPanelFocus);
+  // a->insertItem(Qt::CTRL+Qt::Key_T, TestPanelFocus);
+  // a->insertItem(Qt::CTRL+Qt::Key_S, ScannerPanelFocus);
 }
 
 NavigatorTab::~NavigatorTab ()

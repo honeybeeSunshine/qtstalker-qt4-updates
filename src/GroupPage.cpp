@@ -81,12 +81,12 @@ GroupPage::GroupPage (QWidget *w) : QWidget (w)
   Q3Accel *a = new Q3Accel(this);
   connect(a, SIGNAL(activated(int)), this, SLOT(slotAccel(int)));
   a->insertItem(Qt::CTRL+Qt::Key_N, NewGroup);
-  a->insertItem(Qt::CTRL+Qt::Key_A, AddGroupItem);
+// a->insertItem(Qt::CTRL+Qt::Key_A, AddGroupItem);
 //  a->insertItem(Qt::CTRL+Qt::Key_B, BrowseChart);
   a->insertItem(Qt::CTRL+Qt::Key_D, DeleteGroupItem);
   a->insertItem(Qt::CTRL+Qt::Key_L, DeleteGroup);
-  a->insertItem(Qt::CTRL+Qt::Key_R, RenameGroup);
-  a->insertItem(Qt::CTRL+Qt::Key_H, Help);
+  // a->insertItem(Qt::CTRL+Qt::Key_R, RenameGroup);
+  // a->insertItem(Qt::CTRL+Qt::Key_H, Help);
   a->insertItem(Qt::Key_Insert, BrowseChart);
   a->insertItem(Qt::Key_Delete, DeleteChart);
 
@@ -448,28 +448,28 @@ void GroupPage::doKeyPress (QKeyEvent *key)
   {
     switch(key->key())
     {
-      case Qt::Key_N:
-        slotAccel(NewGroup);
-	break;
-      case Qt::Key_A:
-        slotAccel(AddGroupItem);
-	break;
-//      case Qt::Key_B:
-//        slotAccel(BrowseChart);
-//	break;
-      case Qt::Key_D:
-        slotAccel(DeleteGroupItem);
-	break;
-      case Qt::Key_L:
-        slotAccel(DeleteGroup);
-	break;
-      case Qt::Key_R:
-        slotAccel(RenameGroup);
-	break;
-      case Qt::Key_H:
-        slotAccel(Help);
-	break;
-      default:
+//       case Qt::Key_N:
+//         slotAccel(NewGroup);
+// 	// break;
+//  //      case Qt::Key_A:
+//  //        slotAccel(AddGroupItem);
+// 	// break;
+// //      case Qt::Key_B:
+// //        slotAccel(BrowseChart);
+// //	break;
+//       case Qt::Key_D:
+//         slotAccel(DeleteGroupItem);
+// 	break;
+//       case Qt::Key_L:
+//         slotAccel(DeleteGroup);
+// 	break;
+//       case Qt::Key_R:
+//         slotAccel(RenameGroup);
+// 	break;
+//  //      case Qt::Key_H:
+//  //        slotAccel(Help);
+// 	// break;
+//       default:
         break;
     }
   }

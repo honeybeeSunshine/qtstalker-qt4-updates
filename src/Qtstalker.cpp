@@ -40,6 +40,11 @@
 #include <math.h> // only for fabs()
 #include <db.h>
 
+//#include <unistd.h> //timer function
+#include <string> //added
+#include <qdebug.h>
+#include <QFileSystemWatcher>
+
 #include "Qtstalker.h"
 #include "DataWindow.h"
 #include "ChartPage.h"
@@ -55,7 +60,7 @@
 
 #include "../pics/qtstalker.xpm"
 
-QtstalkerApp::QtstalkerApp()
+QtstalkerApp::QtstalkerApp(int argc, char *argv[])
 {
   recordList = 0;
   status = None;
@@ -75,8 +80,15 @@ QtstalkerApp::QtstalkerApp()
   rcfile.loadData(RcFile::IndexPath, s);
   chartIndex->open(s);
 
+  //change startup barlength from command-line before initializing toolbar... 
+  if (argc > 2) {
+	QString s = argv[2];
+	rcfile.saveData(RcFile::BarLength, s);
+	qDebug() << s;
+  }
+
   initMenuBar();
-  initToolBar();
+  initToolBar(argc, argv);
 
   statusbar = statusBar();
   baseWidget = new QWidget(this);
@@ -173,6 +185,9 @@ QtstalkerApp::QtstalkerApp()
   //rcfile.loadPoint(RcFile::MainWindowPos, p);
   //move(p);
 
+  // monitor for file changes for refresh
+  connect(this, SIGNAL(signalDifferentFile(QString)), chartToolbar, SLOT(slotDifferentFile(QString)));
+
   // setup the indicator page
   ip->updateList();
 
@@ -184,6 +199,7 @@ QtstalkerApp::QtstalkerApp()
   progBar->setMaximumHeight(progBar->height() - 10);
 
   statusbar->message(tr("Ready"), 2000);
+
 }
 
 QtstalkerApp::~QtstalkerApp()
@@ -204,7 +220,7 @@ void QtstalkerApp::initMenuBar()
   connect(menubar, SIGNAL(signalPaperTrade(bool)), this, SLOT(slotPaperTradeChanged(bool)));
 }
 
-void QtstalkerApp::initToolBar()
+void QtstalkerApp::initToolBar(int argc, char *argv[])
 {
   // construct the button toolbar
   mainToolbar = new QToolBar("buttonToolbar",this);
@@ -219,6 +235,17 @@ void QtstalkerApp::initToolBar()
   addToolBar(Qt::TopToolBarArea,extraToolbar);
   extraToolbar->setLabel("Extra Toolbar");
   extraToolbar->slotSetButtonView();
+
+  // add chart from command-line to recent chart list
+  if (argc > 1) {
+	QString selection;
+	QString home;
+	std::string cl1 = argv[1];
+	rcfile.loadData(RcFile::Home,home);
+	selection = home + QString::fromStdString("/data/Stocks/" + cl1);
+    extraToolbar->slotAddRecentChart(selection); 
+  }
+  
   connect(extraToolbar, SIGNAL(fileSelected(QString)), this, SLOT(slotOpenChart(QString)));
   addToolBarBreak();
 
@@ -352,11 +379,13 @@ void QtstalkerApp::slotAbout()
 
 void QtstalkerApp::slotOpenChart(QString selection)
 {
+  // qDebug() << selection;
   // load a chart slot
   chartToolbar->enableSlider(TRUE);
   status = Chart;
   qApp->processEvents();
   loadChart(selection);
+  emit signalDifferentFile(selection);
 }
 
 void QtstalkerApp::slotQuotes()
@@ -618,6 +647,8 @@ void QtstalkerApp::slotDataWindow()
 void QtstalkerApp::slotBarLengthChanged(int barLength)
 {
   QString s;
+//  qDebug(QString::number(barLength));
+  // qDebug() << QString::number(barLength);
   rcfile.loadData(RcFile::BarLength, s);
   int n = s.toInt();
   if (n == barLength) return;
@@ -852,6 +883,8 @@ void QtstalkerApp::addIndicatorButton(QString d)
   connect(menubar, SIGNAL(signalGrid(bool)), plot->getIndicatorPlot(), SLOT(slotGridChanged(bool)));
   connect(menubar, SIGNAL(signalScale(bool)), plot, SLOT(slotScaleToScreenChanged(bool)));
   connect(menubar, SIGNAL(signalDraw(bool)), plot->getIndicatorPlot(), SLOT(slotDrawModeChanged(bool)));
+
+//  w->activateWindow();
 }
 
 void QtstalkerApp::slotChartUpdated()
@@ -1169,6 +1202,7 @@ void QtstalkerApp::slotLoadPlotSizes()
 //**********************************************************************
 //**********************************************************************
 
+
 int main(int argc, char *argv[])
 {
   QApplication app(argc, argv);
@@ -1181,10 +1215,18 @@ int main(int argc, char *argv[])
   translator.load(i18nFile, i18nDir);
   app.installTranslator(&translator);
 
-  QtstalkerApp *qtstalker = new QtstalkerApp();
+  QtstalkerApp *qtstalker = new QtstalkerApp(argc, argv);
   qtstalker->setCaption("Qtstalker");
   qtstalker->show();
   app.setMainWidget(qtstalker);
+
+  //open a chart directly from the command-line
+  if (argc > 1) {
+	QString selection;
+	std::string cl1 = argv[1];
+	selection = QDir::homePath() + QString::fromStdString("/.qtstalker/data1/data/Stocks/" + cl1);
+    qtstalker->slotOpenChart(selection);
+  }
 
   return app.exec();
 }

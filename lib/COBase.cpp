@@ -37,6 +37,8 @@
 #include <QKeyEvent>
 #include <QMenu>
 
+#include <qdebug.h>
+
 COBase::COBase ()
 {
   data = 0;
@@ -108,9 +110,13 @@ void COBase::keyEvent (QKeyEvent *key)
       if (key->state() == Qt::ControlButton)
         prefDialog();
       break;
-    case Qt::Key_D:
+    case Qt::Key_Z:
       if (key->state() == Qt::ControlButton)
         removeObject();
+      break;
+    case Qt::Key_W:
+      if (key->state() == Qt::ControlButton)
+        keyColor();
       break;
     default:
       key->ignore();
@@ -191,6 +197,13 @@ void COBase::setColor (QColor d)
   color =d;
 }
 
+void COBase::keyColor ()
+{
+  setColor(Qt::GlobalColor((rand() % 16)+2));
+  saveFlag = TRUE;
+  emit signalDraw();
+}
+
 QColor COBase::getColor ()
 {
   return color;
@@ -265,10 +278,10 @@ COBase * COBase::getCO (Setting &set)
 {
   QString s;
   set.getData(typeLabel, s);
-  return getCO(s);
+  return getCO(s, 0);
 }
 
-COBase * COBase::getCO (QString &s)
+COBase * COBase::getCO (QString &s, int d)
 {
   COBase *t = 0;
 
@@ -281,7 +294,7 @@ COBase * COBase::getCO (QString &s)
     else
     {
       if (! s.compare("FiboLine"))
-        t = new FiboLine();
+        t = new FiboLine(d);
       else
       {
         if (! s.compare("HorizontalLine"))
@@ -297,7 +310,7 @@ COBase * COBase::getCO (QString &s)
             else
             {
               if (! s.compare("TrendLine"))
-                t = new TrendLine();
+                t = new TrendLine(d);
               else
               {
                 if (! s.compare("VerticalLine"))

@@ -129,8 +129,10 @@ int Scaler::convertToY (double val)
   double t = val - scaleLow;
   int y = (int) (t * scaler);
   y = height - y;
-  if (y > height)
-    y = height;
+  // removed this so angles are drawn correctly when panning or startx is not in view
+  // let's see if we break anything
+  // if (y > height)
+  //   y = height;
   return y;
 }
 

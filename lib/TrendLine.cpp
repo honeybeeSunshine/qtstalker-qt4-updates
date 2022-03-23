@@ -27,12 +27,17 @@
 #include <Q3PointArray>
 #include <QPixmap>
 
-TrendLine::TrendLine ()
+#include <qmath.h>
+#include <qdebug.h>
+
+TrendLine::TrendLine (int cmp)
 {
   defaultColor.setNamedColor("red");
-  usebar = FALSE;
+  usebar = TRUE;
+  autobar = TRUE;
   extend = TRUE;
-  bar = "Close";
+  fan = TRUE;
+  bar = "High-Low";
   helpFile = "trendline.html";
   date2 = date;
   type = "TrendLine";
@@ -43,7 +48,12 @@ TrendLine::TrendLine ()
   evalueLabel = "End Value";
   fieldLabel = "Bar Field";
   usebarLabel = "Use Bar";
+  autobarLabel = "Auto Adjust Line";
   extendLabel = "Extend Line";
+  fanLabel = "Draw Fan";
+
+  interval = cmp;
+  intervalLabel = "Bar Length";
 
   loadDefaults();
 }
@@ -73,79 +83,92 @@ void TrendLine::draw (QPixmap &buffer, Scaler &scaler, int startIndex, int pixel
   if (x2 == -1)
     return;
 
-  int y;
-  int y2;
-  if (getUseBar())
-  {
-    int i = data->getX(date);
-    int i2 = data->getX(date2);
 
-    while (1)
-    {
-      if (! bar.compare(tr("Open")))
-      {
-        y = scaler.convertToY(data->getOpen(i));
-        y2 = scaler.convertToY(data->getOpen(i2));
-	break;
-      }
+  // int y;
+  // float y2;
+  int y = scaler.convertToY(getValue());
+  double y2 = scaler.convertToY(getValue2());
+  //float range = getValue2() - getValue();
 
-      if (! bar.compare(tr("High")))
-      {
-        y = scaler.convertToY(data->getHigh(i));
-        y2 = scaler.convertToY(data->getHigh(i2));
-	break;
-      }
+  // painter.setPen(getColor());
+  painter.setPen(QPen(getColor(), 2));
+  // painter.drawLine (x, y, x2, y2);
 
-      if (! bar.compare(tr("Low")))
-      {
-        y = scaler.convertToY(data->getLow(i));
-        y2 = scaler.convertToY(data->getLow(i2));
-	break;
-      }
-
-      if (! bar.compare(tr("Close")))
-      {
-        y = scaler.convertToY(data->getClose(i));
-        y2 = scaler.convertToY(data->getClose(i2));
-	break;
-      }
-
-      return;
-    }
-  }
-  else
-  {
-    y = scaler.convertToY(getValue());
-    y2 = scaler.convertToY(getValue2());
-  }
-
-  painter.setPen(getColor());
-  painter.drawLine (x, y, x2, y2);
-
-  // save old values;
-  int tx2 = x2;
-  int ty2 = y2;
+  // save starting values;
   int tx = x;
+  int tx2 = x2;
   int ty = y;
+  int ty2 = y2;
 
-  if (getExtend())
+  // // find the slope of the angle and output it
+  // double rise = getValue2() - getValue();
+  // double run = data->getX(date2) - data->getX(date);
+  // // qDebug() << run;
+  // emit message(tr("rise: " + QString::number(rise) + "  run: " + QString::number(run) + "  slope: " + QString::number((rise/run))));
+
+  //make a vector containing the number one
+  std::vector<double> angles(1,1);
+  //try to make a gann fan
+  if (getFan()) {
+    // angles.push_back(0.015625);
+    // angles.push_back(0.03125);
+    // angles.push_back(0.0625);
+    angles.push_back(0.125);
+    angles.push_back(0.25);
+    angles.push_back(0.3333);
+    angles.push_back(0.5);
+    angles.push_back(2);
+    angles.push_back(3);
+    angles.push_back(4);
+    angles.push_back(8);
+    // angles.push_back(16);
+    // angles.push_back(-1);
+    // angles.push_back(-0.0625);
+    // angles.push_back(-0.125);
+    // angles.push_back(-0.25);
+    // angles.push_back(-0.5);
+    // angles.push_back(-2);
+    // angles.push_back(-4);
+    // angles.push_back(-8);
+    // angles.push_back(-16);
+    // angles = {0.0625,0.125,0.25,0.5,1,2,4,8,16};
+  }
+  
+  //use the vector created above to draw one line, or a fan
+  for (float ang : angles)
   {
-    int ydiff = y - y2;
-    int xdiff = x2 - x;
-    while (x2 < buffer.width())
+    x = tx;
+    y = ty;
+    x2 = tx2;
+    y2 = (ty2-y) * ang + y;
+    //y2 = scaler.convertToY(range * ang + getValue());
+    painter.drawLine (x, y, x2, y2);
+
+    if (getExtend())
     {
-      x = x2;
-      y = y2;
-      x2 = x2 + xdiff;
-      y2 = y2 - ydiff;
-      painter.drawLine (x, y, x2, y2);
+      if (ang == float(3) or ang == float(0.3333))
+        painter.setPen(QPen(getColor(), 1, Qt::DotLine));
+      else
+        painter.setPen(QPen(getColor(), 1, Qt::DashDotDotLine));
+      float ydiff = y - y2;
+      int xdiff = x2 - x;
+      while (x2 < buffer.width())
+      {
+        x = x2;
+        y = y2;
+        x2 = x2 + xdiff;
+        y2 = y2 - ydiff;
+        painter.drawLine (x, y, x2, y2);
+      }
     }
   }
+
 
   // store the selectable area the line occupies
   clearSelectionArea();
   Q3PointArray array;
-  array.putPoints(0, 4, tx, ty - 4, tx, ty + 4, x2, y2 + 4, x2, y2 - 4);
+  // array.putPoints(0, 4, tx, ty - 4, tx, ty + 4, x2, y2 + 4, x2, y2 - 4);
+  array.putPoints(0, 4, tx, ty - 4, tx, ty + 4, tx2, ty2 + 4, tx2, ty2 - 4);
   setSelectionArea(new QRegion(array));
 
   if (getStatus() == COBase::Selected)
@@ -173,16 +196,18 @@ void TrendLine::draw (QPixmap &buffer, Scaler &scaler, int startIndex, int pixel
 void TrendLine::prefDialog ()
 {
   QStringList l;
-  l.append(tr("Open"));
-  l.append(tr("High"));
-  l.append(tr("Low"));
-  l.append(tr("Close"));
+  l.append(tr("High-Low"));
+  l.append(tr("High-High"));
+  l.append(tr("Low-High"));
+  l.append(tr("Low-Low"));
 
   QString pl = tr("Details");
   QString cl = tr("Color");
   QString sd = tr("Set Default");
-  QString ub = tr("Use Bar");
+  QString ub = tr("Use Bars");
+  QString ab = tr("Auto Adjust Line");
   QString el = tr("Extend Line");
+  QString fl = tr("Draw Fan");
   QString bf = tr("Bar Field");
   QString sl = tr("Start Value");
   QString dl = tr("End Value");
@@ -194,10 +219,17 @@ void TrendLine::prefDialog ()
   dialog->addColorPrefItem(cl, pl, color);
   dialog->addComboItem(bf, pl, l, bar);
   dialog->addCheckItem(ub, pl, usebar);
+  dialog->addCheckItem(ab, pl, autobar);
+  dialog->addCheckItem(fl, pl, fan);
   dialog->addCheckItem(el, pl, extend);
   dialog->addDoubleItem(sl, pl, getValue());
   dialog->addDoubleItem(dl, pl, getValue2());
   dialog->addCheckItem(sd, pl, FALSE);
+
+  // //store values so we can check if they change
+  // bool ab_old = autobar;
+  // bool ub_old = usebar;
+  // QString bf_old = bar;
 
   int rc = dialog->exec();
 
@@ -206,9 +238,44 @@ void TrendLine::prefDialog ()
     dialog->getColor(cl, color);
     dialog->getCombo(bf, bar);
     usebar = dialog->getCheck(ub);
+    autobar = dialog->getCheck(ab);
     extend = dialog->getCheck(el);
-    setValue(dialog->getDouble(sl));
-    setValue2(dialog->getDouble(dl));
+    fan = dialog->getCheck(fl);
+
+    // //adjust values if autobar or usebar have changed
+    // if ((usebar != ub_old) | (autobar != ab_old) | (bar != bf_old))
+    // {
+    if (autobar) {
+      if (getValue2() <= getValue()) //going down
+      {
+        setValue(data->getHigh(data->getX(date)));
+        setValue2(data->getLow(data->getX(date2)));
+      }
+      else //going up
+      {
+        setValue(data->getLow(data->getX(date)));
+        setValue2(data->getHigh(data->getX(date2)));
+      }
+    }
+    else if (usebar)
+    {
+      if (! bar.compare(tr("High-Low")) | ! bar.compare(tr("High-High")))
+        setValue(data->getHigh(data->getX(date)));
+      else if (! bar.compare(tr("Low-Low")) | ! bar.compare(tr("Low-High")))
+        setValue(data->getLow(data->getX(date)));
+
+      if (! bar.compare(tr("High-Low")) | ! bar.compare(tr("Low-Low")))
+        setValue2(data->getLow(data->getX(date2)));
+      else if (! bar.compare(tr("High-High")) | ! bar.compare(tr("Low-High")))
+        setValue2(data->getHigh(data->getX(date2)));
+    }
+    else
+    {
+      setValue(dialog->getDouble(sl));
+      setValue2(dialog->getDouble(dl));
+    }
+    // }
+
 
     setSaveFlag(TRUE);
 
@@ -218,8 +285,9 @@ void TrendLine::prefDialog ()
       dialog->getColor(cl, defaultColor);
       dialog->getCombo(bf, bar);
       usebar = dialog->getCheck(ub);
+      autobar = dialog->getCheck(ab);
       extend = dialog->getCheck(el);
-
+      fan = dialog->getCheck(fl);
       saveDefaults();
     }
 
@@ -248,6 +316,7 @@ COBase::Status TrendLine::pointerClick (QPoint &point, QDateTime &x, double y)
       if (isSelected(point))
       {
         status = Selected;
+        // ty = y;
         emit signalDraw();
       }
       break;
@@ -267,7 +336,7 @@ COBase::Status TrendLine::pointerClick (QPoint &point, QDateTime &x, double y)
     case Moving:
       status = Selected;
       break;
-    case ClickWait:
+    case ClickWait: //first click, adding new trendline
       tx = x;
       ty = y;
       mpx = point.x();
@@ -281,8 +350,10 @@ COBase::Status TrendLine::pointerClick (QPoint &point, QDateTime &x, double y)
 
       setDate(tx);
       setDate2(x);
+
       setValue(ty);
-      setValue2(y);
+      //check for autobar
+      // setValue2(y);
 
       setSaveFlag(TRUE);
       setColor(defaultColor);
@@ -300,8 +371,53 @@ COBase::Status TrendLine::pointerClick (QPoint &point, QDateTime &x, double y)
 
 void TrendLine::pointerMoving (QPixmap &buffer, QPoint &point, QDateTime &x, double y)
 {
-  if (status == ClickWait2)
+  if (status == ClickWait2) //if this is the same as Fiboline, this is for when selecting second point for first time
   {
+    double cursorVal = y;
+
+    //find the angle of the line we are drawing based on pixels...
+    // int dx = point.x()-mpx;
+    // int dy = mpy-point.y();
+    // double axy = 90-qAtan2(dx,dy)*180/3.14152;
+    // // qDebug() << ("x: " + QString::number(dx) + "  y: " + QString::number(dy) + "  angle: " + QString::number(axy));// + "  slope: " + QString::number((rise/run))));
+    // emit message(tr("x: " + QString::number(dx) + "  y: " + QString::number(dy) + "  angle: " + QString::number(axy)));
+
+
+    // //use bar values
+    // if (getAutoBar()) {
+    //   if (y <= ty) //going down
+    //   {
+    //     ty = data->getHigh(data->getX(tx));
+    //     y = data->getLow(data->getX(x));
+    //   }
+    //   else //going up
+    //   {
+    //     ty = data->getLow(data->getX(tx));
+    //     y = data->getHigh(data->getX(x));
+    //   }
+
+    // try to use high or low based on which is closer
+    if (getAutoBar()) {
+      if (y <= ty) //going down
+        ty = data->getHigh(data->getX(tx));
+      else //going up
+        ty = data->getLow(data->getX(tx));
+
+      double l = data->getLow(data->getX(x));
+      double h = data->getHigh(data->getX(x));
+      if (((l-cursorVal)*(l-cursorVal))>((h-cursorVal)*(h-cursorVal)))
+        y = h;
+      else
+        y = l;
+
+      //but now we also have to adjust bar field and autobar accordingly....
+      //...
+
+      // point.setY(y);
+      setValue2(y);
+      setValue(ty);
+    }
+
     drawMovingPointer(buffer, point);
     return;
   }
@@ -309,10 +425,41 @@ void TrendLine::pointerMoving (QPixmap &buffer, QPoint &point, QDateTime &x, dou
   if (! moveFlag || status != Moving)
     return;
 
-  if (moveFlag == 1)
+  if (moveFlag == 1) //moving start point
   {
     if (x >= date2)
       return;
+
+    double y2;
+    //use bar values
+    if (getAutoBar()) {
+      if (y >= getValue2()) //going down
+      {
+        y = data->getHigh(data->getX(date));
+        y2 = data->getLow(data->getX(date2));
+      }
+      else //going up
+      {
+        y = data->getLow(data->getX(date));
+        y2 = data->getHigh(data->getX(date2));
+      }
+
+      setValue2(y2);
+  
+    } else if (getUseBar())
+    {
+      if (! bar.compare(tr("High-Low")) | ! bar.compare(tr("High-High")))
+        y = data->getHigh(data->getX(x));
+      else if (! bar.compare(tr("Low-Low")) | ! bar.compare(tr("Low-High")))
+        y = data->getLow(data->getX(x));
+
+      if (! bar.compare(tr("High-Low")) | ! bar.compare(tr("Low-Low")))
+        y2 = data->getLow(data->getX(date2));
+      else if (! bar.compare(tr("High-High")) | ! bar.compare(tr("Low-High")))
+        y2 = data->getHigh(data->getX(date2));
+
+      setValue2(y2);
+    }
 
     setDate(x);
     setValue(y);
@@ -321,16 +468,46 @@ void TrendLine::pointerMoving (QPixmap &buffer, QPoint &point, QDateTime &x, dou
     QString s = x.toString("yyyy-MM-dd hh:mm:ss") + " " + QString::number(y);
     emit message(s);
   }
-  else
+  else //moving end point (Value2)
   {
     if (x <= date)
       return;
+
+    double y2; //holding place for y value of start point
+    //use bar values
+    if (getAutoBar()) {
+      if (y <= getValue()) //going down
+      {
+        y2 = data->getHigh(data->getX(date));
+        y = data->getLow(data->getX(date2));
+      }
+      else //going up
+      {
+        y2 = data->getLow(data->getX(date));
+        y = data->getHigh(data->getX(date2));
+      }
+      // point.setY(y);
+      setValue(y2);
+    
+    } else if (getUseBar())
+    {
+      if (! bar.compare(tr("High-Low")) | ! bar.compare(tr("Low-Low")))
+        y = data->getLow(data->getX(x));
+      else if (! bar.compare(tr("High-High")) | ! bar.compare(tr("Low-High")))
+        y = data->getHigh(data->getX(x));
+
+      if (! bar.compare(tr("High-Low")) | ! bar.compare(tr("High-High")))
+        y2 = data->getHigh(data->getX(date));
+      else if (! bar.compare(tr("Low-Low")) | ! bar.compare(tr("Low-High")))
+        y2 = data->getLow(data->getX(date));
+
+      setValue(y2);
+    }
 
     setDate2(x);
     setValue2(y);
     setSaveFlag(TRUE);
     emit signalDraw();
-
     QString s = x.toString("yyyy-MM-dd hh:mm:ss") + " " + QString::number(y);
     emit message(s);
   }
@@ -345,11 +522,13 @@ void TrendLine::drawMovingPointer (QPixmap &buffer, QPoint &point)
   painter.begin(&buffer);
   // FIXME: qt3to4: not sure what to do with this
   // painter.setRasterOp(Qt::XorROP);
-  painter.setPen(defaultColor);
 
-  // erase the previous line drawn
+  // erase the previous line drawn by drawing over it with black???
+  painter.setPen(Qt::black);
   if (mpx2 != -1 && mpy2 != -1)
     painter.drawLine (mpx, mpy, mpx2, mpy2);
+
+  painter.setPen(defaultColor);
 
   // draw the new line
   painter.drawLine (mpx, mpy, point.x(), point.y());
@@ -376,10 +555,20 @@ void TrendLine::loadDefaults ()
   if (s.length())
     bar = s;
 
+  s2 = "DefaultTrendLineAutoBar";
+  settings.getData(s2, s);
+  if (s.length())
+    autobar = s.toInt();
+
   s2 = "DefaultTrendLineExtend";
   settings.getData(s2, s);
   if (s.length())
     extend = s.toInt();
+
+  s2 = "DefaultTrendLineFan";
+  settings.getData(s2, s);
+  if (s.length())
+    fan = s.toInt();
 
   s2 = "DefaultTrendLineUseBar";
   settings.getData(s2, s);
@@ -400,6 +589,14 @@ void TrendLine::saveDefaults ()
 
   s = "DefaultTrendLineExtend";
   s2 = QString::number(extend);
+  config.setData(s, s2);
+
+  s = "DefaultTrendLineFan";
+  s2 = QString::number(fan);
+  config.setData(s, s2);
+
+  s = "DefaultTrendLineAutoBar";
+  s2 = QString::number(autobar);
   config.setData(s, s2);
 
   s = "DefaultTrendLineUseBar";
@@ -477,8 +674,14 @@ void TrendLine::getSettings (Setting &set)
   set.setData(fieldLabel, bar);
   s = QString::number(usebar);
   set.setData(usebarLabel, s);
+  s = QString::number(autobar);
+  set.setData(autobarLabel, s);
   s = QString::number(extend);
   set.setData(extendLabel, s);
+  s = QString::number(fan);
+  set.setData(fanLabel, s);
+  s = QString::number(interval);
+  set.setData(intervalLabel, s);
   s = color.name();
   set.setData(colorLabel, s);
   set.setData(plotLabel, plot);
@@ -502,7 +705,10 @@ void TrendLine::setSettings (Setting &set)
   value2 = set.getDouble(evalueLabel);
   set.getData(fieldLabel, bar);
   usebar = set.getInt(usebarLabel);
+  autobar = set.getInt(autobarLabel);
   extend = set.getInt(extendLabel);
+  interval = set.getInt(intervalLabel);
+  fan = set.getInt(fanLabel);
   set.getData(plotLabel, plot);
   set.getData(nameLabel, name);
 }
@@ -510,6 +716,11 @@ void TrendLine::setSettings (Setting &set)
 bool TrendLine::getUseBar ()
 {
   return usebar;
+}
+
+bool TrendLine::getAutoBar ()
+{
+  return autobar;
 }
 
 void TrendLine::getBar (QString &d)
@@ -520,6 +731,11 @@ void TrendLine::getBar (QString &d)
 bool TrendLine::getExtend ()
 {
   return extend;
+}
+
+bool TrendLine::getFan ()
+{
+  return fan;
 }
 
 void TrendLine::adjustForSplit (QDateTime &dt, double d)

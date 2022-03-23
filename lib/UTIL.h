@@ -40,6 +40,7 @@ class UTIL : public IndicatorPlugin
     PlotLine * calculatePER (QString &p, Q3PtrList<PlotLine> &d);
     PlotLine * calculateREF (QString &p, Q3PtrList<PlotLine> &d);
     PlotLine * calculateSIGN (QString &p, Q3PtrList<PlotLine> &d);
+    PlotLine * calculateFILL (QString &p, Q3PtrList<PlotLine> &d);
     void formatDialog (QStringList &vl, QString &rv, QString &rs);
 
   private:

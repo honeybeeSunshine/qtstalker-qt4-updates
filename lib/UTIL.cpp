@@ -47,6 +47,7 @@ UTIL::UTIL ()
   methodList.append("REF");
   methodList.append("SIGN");
   methodList.append("SUB");
+  methodList.append("FILL");
   methodList.sort();
 
   helpFile = "math.html";
@@ -165,6 +166,12 @@ PlotLine * UTIL::calculateCustom (QString &p, Q3PtrList<PlotLine> &d)
     if (! l[0].compare("SUB"))
     {
       out = calculateADMS(p, d, 3);
+      break;
+    }
+
+    if (! l[0].compare("FILL"))
+    {
+      out = calculateFILL(p, d);
       break;
     }
 
@@ -331,6 +338,27 @@ PlotLine * UTIL::calculateCOLOR (QString &p, Q3PtrList<PlotLine> &d)
   return line;
 }
 
+PlotLine * UTIL::calculateFILL (QString &p, Q3PtrList<PlotLine> &d)
+{
+  PlotLine *line = new PlotLine;
+  PlotLine *input1 = d.at(0); //baseline start value
+  PlotLine *input2 = d.at(1);
+
+  int loop;
+  double last;
+  double current;
+  last = input1->getData(0);
+  for (loop = 0; loop < (int) input2->getSize(); loop++)
+  {
+	current = input2->getData(loop);
+    if (current != 0)
+      last = current;
+    line->append(last);
+  }
+
+  return line;
+}
+
 PlotLine * UTIL::calculateCOMP (QString &p, Q3PtrList<PlotLine> &d)
 {
   // format1: METHOD, ARRAY_INPUT, DOUBLE, OPERATOR
@@ -443,6 +471,13 @@ PlotLine * UTIL::calculateCOMP (QString &p, Q3PtrList<PlotLine> &d)
         else
           line->prepend(0);
         break;
+      // case NotEqual:
+      //   qDebug("in not equal");
+      //   if (input->getData(loop) != t)
+      //     line->prepend(1);
+      //   else
+      //     line->prepend(0);
+      //   break;
       default:
         break;
     }
@@ -470,7 +505,7 @@ PlotLine * UTIL::calculateCOUNTER (QString &p, Q3PtrList<PlotLine> &d)
   }
   else
   {
-    if (l.count() == 2)
+    if (l.count() == 3)
     {
       formatList.append(FormatString);
       formatList.append(FormatInputArray);

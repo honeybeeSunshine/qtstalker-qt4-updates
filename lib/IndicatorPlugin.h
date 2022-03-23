@@ -61,6 +61,7 @@ class IndicatorPlugin : public QObject
       LessThanEqual,
       GreaterThan,
       GreaterThanEqual,
+      // NotEqual,
       And,
       Or
     };

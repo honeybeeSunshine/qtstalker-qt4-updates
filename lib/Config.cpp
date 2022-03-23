@@ -272,7 +272,7 @@ void Config::getData (Parm p, QString &s)
       s = settings.readEntry("/Qtstalker/Grid", "1");
       break;
     case Bars:
-      s = settings.readEntry("/Qtstalker/Bars", "275");
+      s = settings.readEntry("/Qtstalker/Bars", "390");
       break;
     case BackgroundColor:
       s = settings.readEntry("/Qtstalker/BackgroundColor", "black");

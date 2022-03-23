@@ -59,7 +59,7 @@ BarEdit::BarEdit (QWidget *w) : QWidget (w)
   QString s = tr("Search");
   toolbar->addButton(searchLabel, QPixmap(search), s);
   connect(toolbar->getButton(searchLabel), SIGNAL(clicked()), this, SLOT(slotDateSearch()));
-  toolbar->getButton(searchLabel)->setAccel(Qt::CTRL+Qt::Key_R);
+  // toolbar->getButton(searchLabel)->setAccel(Qt::CTRL+Qt::Key_R);
 
   s = tr("Save Record");
   toolbar->addButton(saveLabel, QPixmap(exportfile), s);

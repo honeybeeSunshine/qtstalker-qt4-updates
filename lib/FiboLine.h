@@ -37,7 +37,7 @@ class FiboLine : public COBase
   Q_OBJECT
 
   public:
-    FiboLine();
+    FiboLine(int);
     ~FiboLine();
     void draw(QPixmap &, Scaler &, int, int, int);
     void newObject(QString &, QString &);
@@ -74,17 +74,22 @@ class FiboLine : public COBase
     double high;
     double low;
     bool extend;
+    bool autobar;
     QString highLabel;
     QString lowLabel;
     QString sdateLabel;
     QString edateLabel;
     QString extendLabel;
+    QString autobarLabel;
     QString l1Label;
     QString l2Label;
     QString l3Label;
     QString l4Label;
     QString l5Label;
     QString l6Label;
+
+    int interval;
+    QString intervalLabel;
 };
 
 #endif

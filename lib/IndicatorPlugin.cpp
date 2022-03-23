@@ -46,6 +46,7 @@ IndicatorPlugin::IndicatorPlugin()
   opList.append("AND");
   opList.append("OR");
   opList.append("XOR");
+  opList.append("NOTEQ");
 
   maList.append("SMA"); //    TA_MAType_SMA       =0,
   maList.append("EMA"); //    TA_MAType_EMA       =1,
@@ -185,6 +186,7 @@ void IndicatorPlugin::getHelpFile (QString &d)
 IndicatorPlugin::Operator IndicatorPlugin::getOperator (QString &d)
 {
   int i = opList.findIndex(d);
+  // qDebug("op index %i", i);
   return (Operator) i;
 }
 

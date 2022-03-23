@@ -30,6 +30,11 @@
 //Added by qt3to4:
 #include <Q3PtrList>
 
+
+#include <qdebug.h>
+
+
+
 SYMBOL::SYMBOL ()
 {
   pluginName = "SYMBOL";
@@ -64,12 +69,38 @@ PlotLine * SYMBOL::getSYMBOL ()
 
   QString ts;
   config.getData(Config::BarLength, ts);
-  db.setBarLength((BarData::BarLength) ts.toInt());
+  int bl = ts.toInt();
+  db.setBarLength((BarData::BarLength) bl);
   config.getData(Config::Bars, ts);
-  db.setBarRange(ts.toInt());
+
+  //was only loading "Bars" number of data points regardless of barlength
+  //get more data if using a longer barlength
+  int factor = 1;
+  switch(bl)
+    {
+      case 27: //2-day
+        factor = 2;
+      break;
+      case 28: //3-day
+        factor = 3;
+      break;
+      case 29: //weekly
+        factor = 5;
+      break;
+      case 30: //monthly
+        factor = 24;
+      break;
+    }
+
+  // qDebug() << ts;
+  // qDebug() << factor;
+  // qDebug() << (int) ts.toInt()*factor;
+  db.setBarRange((int) ts.toInt()*factor);
+  // db.setBarRange(1000);
   BarData *recordList = new BarData(symbol);
   QDateTime dt = QDateTime::currentDateTime();
   db.getHistory(recordList, dt);
+
 
   Q3Dict<Setting> dict;
   dict.setAutoDelete(TRUE);
@@ -77,7 +108,9 @@ PlotLine * SYMBOL::getSYMBOL ()
   int loop;
   ts = "Close";
   QString ts2;
+  // qDebug() << recordList->count();
   for (loop = 0; loop < (int) recordList->count(); loop++)
+  //for (loop = 0; loop < 200 ; loop++)
   {
     Setting *r = new Setting;
     ts2 = QString::number(recordList->getClose(loop));
@@ -89,6 +122,7 @@ PlotLine * SYMBOL::getSYMBOL ()
 
   double val = 0;
 
+  // qDebug() << data->count();
   for (loop = 0; loop < (int) data->count(); loop++)
   {
     data->getDate(loop, dt);

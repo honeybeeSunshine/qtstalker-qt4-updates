@@ -105,14 +105,14 @@ IndicatorPage::IndicatorPage (QWidget *w, DBIndex *i) : QWidget (w)
   Q3Accel *a = new Q3Accel(this);
   connect(a, SIGNAL(activated(int)), this, SLOT(slotAccel(int)));
   a->insertItem(Qt::CTRL+Qt::Key_N, NewIndicatorGroup);
-  a->insertItem(Qt::CTRL+Qt::Key_X, DeleteIndicatorGroup);
-  a->insertItem(Qt::CTRL+Qt::Key_W, NewIndicator);
-  a->insertItem(Qt::CTRL+Qt::Key_A, AddLocalIndicator);
-  a->insertItem(Qt::CTRL+Qt::Key_D, DeleteIndicator);
-  a->insertItem(Qt::CTRL+Qt::Key_E, EditIndicator);
-  a->insertItem(Qt::CTRL+Qt::Key_V, MoveIndicator);
-  a->insertItem(Qt::CTRL+Qt::Key_H, Help);
-  a->insertItem(Qt::CTRL+Qt::Key_Tab, Tab);
+  // a->insertItem(Qt::CTRL+Qt::Key_X, DeleteIndicatorGroup);
+  // a->insertItem(Qt::CTRL+Qt::Key_W, NewIndicator);
+  // a->insertItem(Qt::CTRL+Qt::Key_A, AddLocalIndicator);
+  // a->insertItem(Qt::CTRL+Qt::Key_D, DeleteIndicator);
+  // a->insertItem(Qt::CTRL+Qt::Key_E, EditIndicator);
+  // a->insertItem(Qt::CTRL+Qt::Key_V, MoveIndicator);
+  // a->insertItem(Qt::CTRL+Qt::Key_H, Help);
+  // a->insertItem(Qt::CTRL+Qt::Key_Tab, Tab);
 
   itemSelected(QString());
 }

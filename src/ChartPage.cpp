@@ -93,7 +93,7 @@ ChartPage::ChartPage(QWidget *w, DBIndex *i) : QWidget(w)
   a->insertItem(Qt::CTRL+Qt::Key_D, DeleteChart);
   a->insertItem(Qt::CTRL+Qt::Key_X, ExportSymbol);
   a->insertItem(Qt::CTRL+Qt::Key_U, DumpSymbol);
-  a->insertItem(Qt::CTRL+Qt::Key_H, Help);
+  // a->insertItem(Qt::CTRL+Qt::Key_H, Help);
   a->insertItem(Qt::CTRL+Qt::Key_Tab, Tab);
   a->insertItem(Qt::Key_Insert, BrowseChart);
   a->insertItem(Qt::Key_Delete, DeleteChartQuick);

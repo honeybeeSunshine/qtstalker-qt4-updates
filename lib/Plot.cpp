@@ -25,6 +25,10 @@
 #include <Q3HBoxLayout>
 #include <Q3VBoxLayout>
 
+// #include "qdebug.h"
+#include "Config.h"
+
+
 Plot::Plot (QWidget *w, DBIndex *i) : QWidget(w)
 {
   Q3VBoxLayout *vbox = new Q3VBoxLayout(this);
@@ -160,6 +164,13 @@ void Plot::setInterval (BarData::BarLength d)
 {
   datePlot->setInterval(d);
   indicatorPlot->setInterval(d);
+
+  //just trying to set barlength for "SYMBOL.cpp" to use
+  Config config;
+  QString ts;
+  // qDebug() << (int) d;
+  ts = QString::number((int) d);
+  config.setData(Config::BarLength, ts);
 }
 
 void Plot::setDateFlag (bool d)

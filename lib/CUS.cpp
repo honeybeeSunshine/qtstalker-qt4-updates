@@ -134,7 +134,6 @@ Indicator * CUS::calculate ()
         config.closePlugin(plugin);
         return output;
       }
-
       lines.replace(var, out);
     }
 

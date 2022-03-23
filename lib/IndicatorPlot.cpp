@@ -46,6 +46,8 @@
 #include <qinputdialog.h>
 #include <qdir.h>
 
+#include <qdebug.h>
+
 // only for fabs()
 #include <math.h>
 
@@ -89,6 +91,7 @@ IndicatorPlot::IndicatorPlot (QWidget *w, DBIndex *i) : QWidget(w)
   coSelected = 0;
   dateFlag = TRUE;
   menuFlag = TRUE;
+  arrowFlag = FALSE;
 
   plotFont.setFamily("DejaVu Sans");
   plotFont.setPointSize(10);
@@ -101,7 +104,10 @@ IndicatorPlot::IndicatorPlot (QWidget *w, DBIndex *i) : QWidget(w)
   chartMenu = new QMenu();
 
   setMouseTracking(TRUE);
-  setFocusPolicy(Qt::ClickFocus);
+  // setFocusPolicy(Qt::ClickFocus);
+  setFocusPolicy(Qt::StrongFocus);
+  setFocus();
+  // QWidget::grabKeyboard();
   coList.setAutoDelete(TRUE);
 }
 
@@ -181,6 +187,7 @@ void IndicatorPlot::setInfoFlag (bool d)
 void IndicatorPlot::setInterval (BarData::BarLength d)
 {
   interval = d;
+/*  qDebug() << interval;*/
 }
 
 void IndicatorPlot::draw ()
@@ -199,8 +206,8 @@ void IndicatorPlot::draw ()
     drawXGrid();
     drawYGrid();
     drawInfo();
-    drawLines();
     drawObjects();
+    drawLines();
     drawCrossHair();
     drawCrossCursor();
   }
@@ -312,6 +319,12 @@ void IndicatorPlot::mousePressEvent (QMouseEvent *event)
       }
     }
 
+    // if (mouseFlag == 'paperdateselect')
+    // {
+    //   emit statusMessage("select bar to enter paper trade mode");
+    //   mouseFlag = None;
+    // }
+
     if (mouseFlag == COSelected)
     {
       QPoint p(event->x(), event->y());
@@ -339,6 +352,9 @@ void IndicatorPlot::mousePressEvent (QMouseEvent *event)
 
     if (mouseFlag == ClickWait)
     {
+      //hack to get cursor lines to draw for placing arrows
+      arrowFlag = FALSE;
+
       QPoint p(event->x(), event->y());
       COBase::Status rc = coSelected->pointerClick(p, x1, y1);
       if (rc == COBase::None)
@@ -375,7 +391,7 @@ void IndicatorPlot::mouseMoveEvent (QMouseEvent *event)
   // are we trying to drag a chart object?
   if (drawMode)
   {
-    if (mouseFlag == Moving || mouseFlag == ClickWait)
+    if ((mouseFlag == Moving || mouseFlag == ClickWait) &&  ! arrowFlag)
     {
       getXY(event->x(), event->y());
       QPoint p(event->x(), event->y());
@@ -480,31 +496,74 @@ void IndicatorPlot::mouseDoubleClickEvent (QMouseEvent *)
 
 void IndicatorPlot::keyPressEvent (QKeyEvent *key)
 {
-  // if chart object selected then pass keyevent to it
-  if (mouseFlag == COSelected)
+  // qDebug() << "keypress in indicator plot";
+  if (key->state() == Qt::ControlButton)
   {
-    coSelected->keyEvent(key);
-    return;
-  }
+    // if chart object selected then pass keyevent to it
+    if (mouseFlag == COSelected)
+    {
+      coSelected->keyEvent(key);
+      return;
+    }
 
-  // process for plot keyevents
-  switch (key->key())
-  {
-    case Qt::Key_Left:
-    case Qt::Key_Right:
-    case Qt::Key_Home:
-    case Qt::Key_End:
-    case Qt::Key_Plus:
-    case Qt::Key_Minus:
-    case Qt::Key_PageUp:
-    case Qt::Key_PageDown:
-    case Qt::Key_Up:
-    case Qt::Key_Down:
-      emit keyPressed(key);
-      break;
-    default:
-      key->ignore();
-      break;
+    QString selection;
+    // process for plot keyevents
+    switch (key->key())
+    {
+      case Qt::Key_A:        
+        selection = QString::fromStdString("TrendLine");
+        newChartObject(selection);
+        break;
+      case Qt::Key_F:
+        selection = QString::fromStdString("FiboLine");
+        newChartObject(selection);
+        break;
+      case Qt::Key_V:
+        selection = QString::fromStdString("VerticalLine");
+        newChartObject(selection);
+        break;
+      case Qt::Key_H:
+        selection = QString::fromStdString("HorizontalLine");
+        newChartObject(selection);
+        break;
+      case Qt::Key_B:
+        // crosshairs = TRUE;
+        // crossHairFlag = TRUE;
+        selection = QString::fromStdString("BuyArrow");
+        newChartObject(selection);
+        // markCrossHair(0, 0, TRUE);
+        break;
+      case Qt::Key_S:
+        // crossHairFlag = TRUE;
+        // crossHairFlag = TRUE;
+        // markCrossHair(0, 0, TRUE);
+        selection = QString::fromStdString("SellArrow");
+        newChartObject(selection);
+        break;
+      case Qt::Key_P:
+        crosshairs = TRUE;
+        crossHairFlag = TRUE;
+        drawCrossHair();
+        // mouseFlag = 'paperdateselect';
+        // markCrossHair(0, 0, TRUE);
+        //select a bar and enable papertrade at that bar
+        break;      
+      // case Qt::Key_Left:
+      // case Qt::Key_Right:
+      // case Qt::Key_Home:
+      // case Qt::Key_End:
+      // case Qt::Key_Plus:
+      // case Qt::Key_Minus:
+      // case Qt::Key_PageUp:
+      // case Qt::Key_PageDown:
+      // case Qt::Key_Up:
+      // case Qt::Key_Down:
+      //   emit keyPressed(key);
+      //   break;
+      // default:
+      //   key->ignore();
+      //   break;
+    }
   }
 }
 
@@ -632,11 +691,12 @@ void IndicatorPlot::drawInfo ()
 
   //QFontMetrics fm = painter.fontMetrics();
   int pos = startX;
+  int pos2 = startX;
 
   QString s;
   Bar bar;
   data->getBar(data->count() - 1, bar);
-  bar.getDateString(TRUE, s);
+  bar.getDateTimeString(TRUE, s);
   s.append(" ");
   painter.drawText(pos, 10, s, -1);
   pos = pos + plotFontMetrics->width(s);
@@ -718,8 +778,8 @@ void IndicatorPlot::drawInfo ()
           QColor c;
           line->getColor(c);
           painter.setPen(c);
-          painter.drawText(pos, 10, s, -1);
-          pos = pos + plotFontMetrics->width(s);
+          painter.drawText(pos2, 25, s, -1);
+          pos2 = pos2 + plotFontMetrics->width(s);
         }
       }
     }
@@ -836,14 +896,28 @@ void IndicatorPlot::setScale ()
   double scaleLow = 99999999;
   bool pfFlag = FALSE;
 
+
+  //let's try to square the chart
+  QString s;
+  indy->getName(s);
+
+
   if (indy && indy->getEnable())
   {
+    // quick hack to restrict display range of indicator
+    // QString s;
+    // indy->getName(s);
+    // if (s == "CRD9zm")
+    // {
+    //   scaleHigh = 17;
+    //   scaleLow = -10;
+    // }
     int loop;
     for (loop = 0; loop < indy->getLines(); loop++)
     {
       PlotLine *line = indy->getLine(loop);
       if (line->getType() == PlotLine::Invisible)
-	continue;
+	      continue;
 
       if (line->getScaleFlag())
         continue;
@@ -853,7 +927,7 @@ void IndicatorPlot::setScale ()
 
       if (! scaleToScreen)
       {
-	if (line->getHigh() > scaleHigh)
+      	if (line->getHigh() > scaleHigh)
           scaleHigh = line->getHigh();
 
         if (line->getLow() < scaleLow)
@@ -874,6 +948,10 @@ void IndicatorPlot::setScale ()
           scaleHigh = h;
         if (l < scaleLow)
           scaleLow = l;
+        //attempt to keep the chart square as we scroll along
+        if (s == "gann")
+          scaleHigh = l + 405*200;
+          // scaleLow = h - 405*100;
       }
     }
   }
@@ -906,7 +984,23 @@ void IndicatorPlot::setScale ()
   {
     logScaleHigh = scaleHigh > 0.0 ? log(scaleHigh) : 1;
     double logScaleLow = scaleLow > 0.0 ? log(scaleLow) : 0;
+  	//logScaleHigh = logScaleHigh * 1.005;
+  	//logScaleLow = logScaleLow * 0.995;
     logRange = logScaleHigh - logScaleLow;
+  	logScaleHigh += logRange * 0.05;
+  	logScaleLow -= logRange * 0.05;
+    logRange = logScaleHigh - logScaleLow;
+  }
+
+  //let's try to square the chart
+  // QString s;
+  // indy->getName(s);
+  // if (s == "gann") scaleHigh = scaleLow + (data->count()*9);
+  // else {
+    // //add blank space above and below plot area
+  if (s != "gann") {
+    scaleHigh = scaleHigh + (scaleHigh - scaleLow) * 0.05;
+    scaleLow = scaleLow - (scaleHigh - scaleLow) * 0.05;
   }
 
   scaler.set(buffer.height(), scaleHigh, scaleLow, logScaleHigh, logRange, logScale);
@@ -932,7 +1026,7 @@ void IndicatorPlot::strip (double d, int p, QString &s)
     if (fabs(d) > 1000)
       s = QString::number(d, 'f', 0);
     else
-      s = QString::number(d, 'f', 2);
+      s = QString::number(d, 'f', 3);
   }
 
 /*
@@ -1005,22 +1099,21 @@ void IndicatorPlot::showPopupMenu ()
   chartMenu->insertSeparator ();
 
   chartObjectMenu = new QMenu();
-  int id = chartObjectMenu->insertItem(QPixmap(buyarrow), "BuyArrow", this, SLOT(slotNewChartObject(int)));
+  int id = chartObjectMenu->insertItem(QPixmap(buyarrow), "BuyArrow", this, SLOT(slotNewChartObject(int)), Qt::CTRL+Qt::Key_B);
   chartObjectMenu->setItemParameter(id, id);
   id = chartObjectMenu->insertItem(QPixmap(arc), "Cycle", this, SLOT(slotNewChartObject(int)));
   chartObjectMenu->setItemParameter(id, id);
-  id = chartObjectMenu->insertItem(QPixmap(fib), "FiboLine", this, SLOT(slotNewChartObject(int)));
+  id = chartObjectMenu->insertItem(QPixmap(fib), "FiboLine", this, SLOT(slotNewChartObject(int)), Qt::CTRL+Qt::Key_F);
   chartObjectMenu->setItemParameter(id, id);
-  id = chartObjectMenu->insertItem(QPixmap(horizontal), "HorizontalLine", this,
-                                   SLOT(slotNewChartObject(int)));
+  id = chartObjectMenu->insertItem(QPixmap(horizontal), "HorizontalLine", this, SLOT(slotNewChartObject(int)), Qt::CTRL+Qt::Key_H);
   chartObjectMenu->setItemParameter(id, id);
-  id = chartObjectMenu->insertItem(QPixmap(sellarrow), "SellArrow", this, SLOT(slotNewChartObject(int)));
+  id = chartObjectMenu->insertItem(QPixmap(sellarrow), "SellArrow", this, SLOT(slotNewChartObject(int)), Qt::CTRL+Qt::Key_S);
   chartObjectMenu->setItemParameter(id, id);
   id = chartObjectMenu->insertItem(QPixmap(text), "Text", this, SLOT(slotNewChartObject(int)));
   chartObjectMenu->setItemParameter(id, id);
-  id = chartObjectMenu->insertItem(QPixmap(trend), "TrendLine", this, SLOT(slotNewChartObject(int)));
+  id = chartObjectMenu->insertItem(QPixmap(trend), "TrendLine", this, SLOT(slotNewChartObject(int)), Qt::CTRL+Qt::Key_A);
   chartObjectMenu->setItemParameter(id, id);
-  id = chartObjectMenu->insertItem(QPixmap(vertical), "VerticalLine", this, SLOT(slotNewChartObject(int)));
+  id = chartObjectMenu->insertItem(QPixmap(vertical), "VerticalLine", this, SLOT(slotNewChartObject(int)), Qt::CTRL+Qt::Key_V);
   chartObjectMenu->setItemParameter(id, id);
 
   id = chartMenu->insertItem (QPixmap(co), tr("New Chart Object"), chartObjectMenu);
@@ -1597,6 +1690,7 @@ void IndicatorPlot::drawPF ()
 
 void IndicatorPlot::slotNewChartObject (int id)
 {
+  qDebug() << id;
   if (! chartPath.length())
     return;
 
@@ -1605,9 +1699,24 @@ void IndicatorPlot::slotNewChartObject (int id)
     return;
 
   QString selection = chartObjectMenu->text(id);
+  // qDebug() << selection;
+  newChartObject(selection);
+}
+
+
+void IndicatorPlot::newChartObject (QString selection)
+{
+  // qDebug() << selection;
+  if (! chartPath.length())
+    return;
+
+  QDir dir;
+  if (! dir.exists(chartPath))
+    return;
 
   COBase tco;
-  coSelected = tco.getCO(selection);
+  // pass interval along to record timeframe chart objects were drawn on
+  coSelected = tco.getCO(selection, interval);
   if (! coSelected)
     return;
 
@@ -1632,10 +1741,31 @@ void IndicatorPlot::slotNewChartObject (int id)
 
   setCursor(QCursor(Qt::PointingHandCursor));
 
+  //add this to try and get the cursors working for placing arrows
+  if (selection == QString::fromStdString("BuyArrow") || selection == QString::fromStdString("SellArrow"))
+  {
+      // qDebug() << selection;
+      // setCrosshairsStatus(TRUE);
+        crosshairs = TRUE;
+        crossHairFlag = TRUE;
+        arrowFlag = TRUE;
+  }
+  else
+  {
+        crosshairs = FALSE;
+        crossHairFlag = FALSE;
+        arrowFlag = FALSE;
+  }
+  // update();
+  // emit signalDraw();
+  draw();
+
   mouseFlag = ClickWait;
 
   coSelected->newObject(s, name);
 }
+
+
 
 void IndicatorPlot::addChartObject (Setting &set)
 {

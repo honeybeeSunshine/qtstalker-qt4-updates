@@ -59,15 +59,41 @@ class BarData
 
     enum BarLength
     {
+      CustomBar,
+      Second5,
+      Second10,
+      Second15,
+      Second20,
+      Second30,
+      Second45,
       Minute1,
-      Minute5,
+      Minute2,
+      Minute3,
+      Minute4,
+  	  Minute5,
+      Minute6,
       Minute10,
+      Minute12,
       Minute15,
+  	  Minute20,
       Minute30,
-      Minute60,
+      Minute45,
+      Hour1,
+  	  Hour2,
+  	  Hour3,
+  	  Hour4,
+  	  Hour6,
+  	  Hour8,
+  	  Hour12,
       DailyBar,
+  	  Day2,
+  	  Day3,
       WeeklyBar,
-      MonthlyBar
+      MonthlyBar,
+      Day2w,
+      Day3w,
+      Day5w,
+      Day8w
     };
 
     BarData(QString &);

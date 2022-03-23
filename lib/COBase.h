@@ -83,6 +83,7 @@ class COBase : public QObject
     void setDate(QDateTime &);
     void getDate(QDateTime &);
     void setColor(QColor);
+    void keyColor();
     QColor getColor();
     void setValue(double);
     double getValue();
@@ -91,7 +92,7 @@ class COBase : public QObject
     bool isSelected(QPoint point);
     bool isGrabSelected(QPoint point);
     COBase * getCO(Setting &);
-    COBase * getCO(QString &);
+    COBase * getCO(QString &, int);
 
   public slots:
     virtual void prefDialog();

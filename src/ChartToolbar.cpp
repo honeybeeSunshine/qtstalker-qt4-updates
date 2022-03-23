@@ -29,8 +29,16 @@
 #include <qvalidator.h>
 //Added by qt3to4:
 #include <QKeyEvent>
+
+#include <QPixmap>
+#include "../pics/eye.xpm"
+
 #include "../pics/date.xpm"
 #include "../pics/next.xpm"
+
+#include <QTimer>
+// #include <qdebug.h>
+#include <Config.h>
 
 ChartToolbar::ChartToolbar(QMainWindow *mw) : QToolBar("chartToolbar", mw )
 {
@@ -52,17 +60,104 @@ ChartToolbar::ChartToolbar(QMainWindow *mw) : QToolBar("chartToolbar", mw )
   connect(compressionCombo, SIGNAL(activated(int)), this, SLOT(compressionChanged(int)));
   connect(compressionCombo, SIGNAL(activated(int)), this, SIGNAL(signalBarLengthChanged(int)));
 
+  // customBarCount = new QLineEdit(this);
+  // customBarCountAction = addWidget(customBarCount);
+  // // regexp: a non-zero digit followed by 0 to 4 other digits
+  // QRegExp rx("[1-9]\\d{0,4}");
+  // QValidator *rv = new QRegExpValidator(rx, this);
+  // customBarCount->setValidator(rv);
+  // // rcfile.loadData(RcFile::BarsToLoad, ti);
+  // customBarCount->setText(QString::number(ti));
+  // QToolTip::add(customBarCount, tr("custom bar length in seconds"));
+  // connect(customBarCount, SIGNAL(lostFocus()), this, SLOT(barsChangedValidate()));
+  // connect(customBarCount, SIGNAL(returnPressed()), this, SLOT(barsChanged()));
+
+  // //try to get screen to refresh on a timer
+  // refreshTbtn = new QToolButton(this);
+  // refreshTAct = addWidget(refreshTbtn);
+  // QToolTip::add(refreshTbtn, tr("turn on auto refresh"));
+  // refreshTbtn->setToggleButton(TRUE);
+  // connect(refreshTbtn, SIGNAL(toggled(bool)), this, SLOT(refreshTimerClicked(bool)));
+  // refreshTimer = new QTimer(this);
+  // connect(refreshTimer, SIGNAL(timeout()), SLOT(refresh()));
+
+  //try to refresh on filechanges
+  QPixmap icon(eye);
+  refreshTbtn = new QToolButton(this);
+  refreshTAct = addWidget(refreshTbtn);
+  refreshTbtn->setIconSet(icon);
+  QToolTip::add(refreshTbtn, tr("turn on auto refresh"));
+  refreshTbtn->setToggleButton(TRUE);
+  connect(refreshTbtn, SIGNAL(toggled(bool)), this, SLOT(fileWatcherClicked(bool)));
+  watcherOn = FALSE;
+  watcher = new QFileSystemWatcher();
+  connect(watcher, SIGNAL(fileChanged(QString)), this, SLOT(slotFileModDetected()));
+
+  cmpsBtnCustomBar = new QToolButton(this);
+  cmpsActCustomBar = addWidget(cmpsBtnCustomBar);
+  QToolTip::add(cmpsBtnCustomBar, tr("custom (sec) Compression"));
+  cmpsBtnCustomBar->setToggleButton(TRUE);
+  connect(cmpsBtnCustomBar, SIGNAL(clicked()), this, SLOT(cmpsBtnCustomBarClicked()));
+
+  cmpsBtn5S = new QToolButton(this);
+  cmpsAct5S = addWidget(cmpsBtn5S);
+  QToolTip::add(cmpsBtn5S, tr("5 Second Compression"));
+  cmpsBtn5S->setToggleButton(TRUE);
+  connect(cmpsBtn5S, SIGNAL(clicked()), this, SLOT(cmpsBtn5SClicked()));
+
+  cmpsBtn10S = new QToolButton(this);
+  cmpsAct10S = addWidget(cmpsBtn10S);
+  QToolTip::add(cmpsBtn10S, tr("10 Second Compression"));
+  cmpsBtn10S->setToggleButton(TRUE);
+  connect(cmpsBtn10S, SIGNAL(clicked()), this, SLOT(cmpsBtn10SClicked()));
+
+  cmpsBtn15S = new QToolButton(this);
+  cmpsAct15S = addWidget(cmpsBtn15S);
+  QToolTip::add(cmpsBtn15S, tr("15 Second Compression"));
+  cmpsBtn15S->setToggleButton(TRUE);
+  connect(cmpsBtn15S, SIGNAL(clicked()), this, SLOT(cmpsBtn15SClicked()));
+
+  cmpsBtn20S = new QToolButton(this);
+  cmpsAct20S = addWidget(cmpsBtn20S);
+  QToolTip::add(cmpsBtn20S, tr("20 Second Compression"));
+  cmpsBtn20S->setToggleButton(TRUE);
+  connect(cmpsBtn20S, SIGNAL(clicked()), this, SLOT(cmpsBtn20SClicked()));
+
+  cmpsBtn30S = new QToolButton(this);
+  cmpsAct30S = addWidget(cmpsBtn30S);
+  QToolTip::add(cmpsBtn30S, tr("30 Second Compression"));
+  cmpsBtn30S->setToggleButton(TRUE);
+  connect(cmpsBtn30S, SIGNAL(clicked()), this, SLOT(cmpsBtn30SClicked()));
+
+  cmpsBtn45S = new QToolButton(this);
+  cmpsAct45S = addWidget(cmpsBtn45S);
+  QToolTip::add(cmpsBtn45S, tr("45 Second Compression"));
+  cmpsBtn45S->setToggleButton(TRUE);
+  connect(cmpsBtn45S, SIGNAL(clicked()), this, SLOT(cmpsBtn45SClicked()));
+
   cmpsBtn1M = new QToolButton(this);
   cmpsAct1M = addWidget(cmpsBtn1M);
   QToolTip::add(cmpsBtn1M, tr("1 Minute Compression"));
   cmpsBtn1M->setToggleButton(TRUE);
   connect(cmpsBtn1M, SIGNAL(clicked()), this, SLOT(cmpsBtn1MClicked()));
 
-//  cmpsBtn2M = new QToolButton(this);
-//  cmpsAct2M = addWidget(cmpsBtn2M);
-//  QToolTip::add(cmpsBtn2M, tr("2 Minute Compression"));
-//  cmpsBtn2M->setToggleButton(TRUE);
-//  connect(cmpsBtn2M, SIGNAL(clicked()), this, SLOT(cmpsBtn2MClicked()));
+  cmpsBtn2M = new QToolButton(this);
+  cmpsAct2M = addWidget(cmpsBtn2M);
+  QToolTip::add(cmpsBtn2M, tr("2 Minute Compression"));
+  cmpsBtn2M->setToggleButton(TRUE);
+  connect(cmpsBtn2M, SIGNAL(clicked()), this, SLOT(cmpsBtn2MClicked()));
+
+  cmpsBtn3M = new QToolButton(this);
+  cmpsAct3M = addWidget(cmpsBtn3M);
+  QToolTip::add(cmpsBtn3M, tr("3 Minute Compression"));
+  cmpsBtn3M->setToggleButton(TRUE);
+  connect(cmpsBtn3M, SIGNAL(clicked()), this, SLOT(cmpsBtn3MClicked()));
+
+  cmpsBtn4M = new QToolButton(this);
+  cmpsAct4M = addWidget(cmpsBtn4M);
+  QToolTip::add(cmpsBtn4M, tr("4 Minute Compression"));
+  cmpsBtn4M->setToggleButton(TRUE);
+  connect(cmpsBtn4M, SIGNAL(clicked()), this, SLOT(cmpsBtn4MClicked()));
 
   cmpsBtn5M = new QToolButton(this);
   cmpsAct5M = addWidget(cmpsBtn5M);
@@ -70,11 +165,23 @@ ChartToolbar::ChartToolbar(QMainWindow *mw) : QToolBar("chartToolbar", mw )
   cmpsBtn5M->setToggleButton(TRUE);
   connect(cmpsBtn5M, SIGNAL(clicked()), this, SLOT(cmpsBtn5MClicked()));
 
+  cmpsBtn6M = new QToolButton(this);
+  cmpsAct6M = addWidget(cmpsBtn6M);
+  QToolTip::add(cmpsBtn6M, tr("6 Minute Compression"));
+  cmpsBtn6M->setToggleButton(TRUE);
+  connect(cmpsBtn6M, SIGNAL(clicked()), this, SLOT(cmpsBtn6MClicked()));
+
   cmpsBtn10M = new QToolButton(this);
   cmpsAct10M = addWidget(cmpsBtn10M);
   QToolTip::add(cmpsBtn10M, tr("10 Minute Compression"));
   cmpsBtn10M->setToggleButton(TRUE);
   connect(cmpsBtn10M, SIGNAL(clicked()), this, SLOT(cmpsBtn10MClicked()));
+
+  cmpsBtn12M = new QToolButton(this);
+  cmpsAct12M = addWidget(cmpsBtn12M);
+  QToolTip::add(cmpsBtn12M, tr("12 Minute Compression"));
+  cmpsBtn12M->setToggleButton(TRUE);
+  connect(cmpsBtn12M, SIGNAL(clicked()), this, SLOT(cmpsBtn12MClicked()));
 
   cmpsBtn15M = new QToolButton(this);
   cmpsAct15M = addWidget(cmpsBtn15M);
@@ -82,11 +189,11 @@ ChartToolbar::ChartToolbar(QMainWindow *mw) : QToolBar("chartToolbar", mw )
   cmpsBtn15M->setToggleButton(TRUE);
   connect(cmpsBtn15M, SIGNAL(clicked()), this, SLOT(cmpsBtn15MClicked()));
 
-//  cmpsBtn20M = new QToolButton(this);
-//  cmpsAct20M = addWidget(cmpsBtn20M);
-//  QToolTip::add(cmpsBtn20M, tr("20 Minute Compression"));
-//  cmpsBtn20M->setToggleButton(TRUE);
-//  connect(cmpsBtn20M, SIGNAL(clicked()), this, SLOT(cmpsBtn20MClicked()));
+  cmpsBtn20M = new QToolButton(this);
+  cmpsAct20M = addWidget(cmpsBtn20M);
+  QToolTip::add(cmpsBtn20M, tr("20 Minute Compression"));
+  cmpsBtn20M->setToggleButton(TRUE);
+  connect(cmpsBtn20M, SIGNAL(clicked()), this, SLOT(cmpsBtn20MClicked()));
 
   cmpsBtn30M = new QToolButton(this);
   cmpsAct30M = addWidget(cmpsBtn30M);
@@ -94,29 +201,71 @@ ChartToolbar::ChartToolbar(QMainWindow *mw) : QToolBar("chartToolbar", mw )
   cmpsBtn30M->setToggleButton(TRUE);
   connect(cmpsBtn30M, SIGNAL(clicked()), this, SLOT(cmpsBtn30MClicked()));
 
+  cmpsBtn45M = new QToolButton(this);
+  cmpsAct45M = addWidget(cmpsBtn45M);
+  QToolTip::add(cmpsBtn45M, tr("45 Minute Compression"));
+  cmpsBtn45M->setToggleButton(TRUE);
+  connect(cmpsBtn45M, SIGNAL(clicked()), this, SLOT(cmpsBtn45MClicked()));
+
   cmpsBtn1H = new QToolButton(this);
   cmpsAct1H = addWidget(cmpsBtn1H);
   QToolTip::add(cmpsBtn1H, tr("1 Hour Compression"));
   cmpsBtn1H->setToggleButton(TRUE);
   connect(cmpsBtn1H, SIGNAL(clicked()), this, SLOT(cmpsBtn1HClicked()));
 
-//  cmpsBtn2H = new QToolButton(this);
-//  cmpsAct2H = addWidget(cmpsBtn2H);
-//  QToolTip::add(cmpsBtn2H, tr("2 Hour Compression"));
-//  cmpsBtn2H->setToggleButton(TRUE);
-//  connect(cmpsBtn2H, SIGNAL(clicked()), this, SLOT(cmpsBtn2HClicked()));
+  cmpsBtn2H = new QToolButton(this);
+  cmpsAct2H = addWidget(cmpsBtn2H);
+  QToolTip::add(cmpsBtn2H, tr("2 Hour Compression"));
+  cmpsBtn2H->setToggleButton(TRUE);
+  connect(cmpsBtn2H, SIGNAL(clicked()), this, SLOT(cmpsBtn2HClicked()));
 
-//  cmpsBtn4H = new QToolButton(this);
-//  cmpsAct4H = addWidget(cmpsBtn4H);
-//  QToolTip::add(cmpsBtn4H, tr("4 Hour Compression"));
-//  cmpsBtn4H->setToggleButton(TRUE);
-//  connect(cmpsBtn4H, SIGNAL(clicked()), this, SLOT(cmpsBtn4HClicked()));
+  cmpsBtn3H = new QToolButton(this);
+  cmpsAct3H = addWidget(cmpsBtn3H);
+  QToolTip::add(cmpsBtn3H, tr("3 Hour Compression"));
+  cmpsBtn3H->setToggleButton(TRUE);
+  connect(cmpsBtn3H, SIGNAL(clicked()), this, SLOT(cmpsBtn3HClicked()));
+
+  cmpsBtn4H = new QToolButton(this);
+  cmpsAct4H = addWidget(cmpsBtn4H);
+  QToolTip::add(cmpsBtn4H, tr("4 Hour Compression"));
+  cmpsBtn4H->setToggleButton(TRUE);
+  connect(cmpsBtn4H, SIGNAL(clicked()), this, SLOT(cmpsBtn4HClicked()));
+
+  cmpsBtn6H = new QToolButton(this);
+  cmpsAct6H = addWidget(cmpsBtn6H);
+  QToolTip::add(cmpsBtn6H, tr("6 Hour Compression"));
+  cmpsBtn6H->setToggleButton(TRUE);
+  connect(cmpsBtn6H, SIGNAL(clicked()), this, SLOT(cmpsBtn6HClicked()));
+
+  cmpsBtn8H = new QToolButton(this);
+  cmpsAct8H = addWidget(cmpsBtn8H);
+  QToolTip::add(cmpsBtn8H, tr("8 Hour Compression"));
+  cmpsBtn8H->setToggleButton(TRUE);
+  connect(cmpsBtn8H, SIGNAL(clicked()), this, SLOT(cmpsBtn8HClicked()));
+
+  cmpsBtn12H = new QToolButton(this);
+  cmpsAct12H = addWidget(cmpsBtn12H);
+  QToolTip::add(cmpsBtn12H, tr("12 Hour Compression"));
+  cmpsBtn12H->setToggleButton(TRUE);
+  connect(cmpsBtn12H, SIGNAL(clicked()), this, SLOT(cmpsBtn12HClicked()));
 
   cmpsBtn1D = new QToolButton(this);
   cmpsAct1D = addWidget(cmpsBtn1D);
   QToolTip::add(cmpsBtn1D, tr("1 Day Compression"));
   cmpsBtn1D->setToggleButton(TRUE);
   connect(cmpsBtn1D, SIGNAL(clicked()), this, SLOT(cmpsBtn1DClicked()));
+
+  cmpsBtn2D = new QToolButton(this);
+  cmpsAct2D = addWidget(cmpsBtn2D);
+  QToolTip::add(cmpsBtn2D, tr("2 Day Compression"));
+  cmpsBtn2D->setToggleButton(TRUE);
+  connect(cmpsBtn2D, SIGNAL(clicked()), this, SLOT(cmpsBtn2DClicked()));
+
+  cmpsBtn3D = new QToolButton(this);
+  cmpsAct3D = addWidget(cmpsBtn3D);
+  QToolTip::add(cmpsBtn3D, tr("3 Day Compression"));
+  cmpsBtn3D->setToggleButton(TRUE);
+  connect(cmpsBtn3D, SIGNAL(clicked()), this, SLOT(cmpsBtn3DClicked()));
 
   cmpsBtn1W = new QToolButton(this);
   cmpsAct1W = addWidget(cmpsBtn1W);
@@ -129,6 +278,32 @@ ChartToolbar::ChartToolbar(QMainWindow *mw) : QToolBar("chartToolbar", mw )
   QToolTip::add(cmpsBtnMN, tr("1 Month Compression"));
   cmpsBtnMN->setToggleButton(TRUE);
   connect(cmpsBtnMN, SIGNAL(clicked()), this, SLOT(cmpsBtnMNClicked()));
+
+  addSeparator();
+
+  cmpsBtn2Dw = new QToolButton(this);
+  cmpsAct2Dw = addWidget(cmpsBtn2Dw);
+  QToolTip::add(cmpsBtn2Dw, tr("2 Day w weekend trading"));
+  cmpsBtn2Dw->setToggleButton(TRUE);
+  connect(cmpsBtn2Dw, SIGNAL(clicked()), this, SLOT(cmpsBtn2DwClicked()));
+
+  cmpsBtn3Dw = new QToolButton(this);
+  cmpsAct3Dw = addWidget(cmpsBtn3Dw);
+  QToolTip::add(cmpsBtn3Dw, tr("3 Day w weekend trading"));
+  cmpsBtn3Dw->setToggleButton(TRUE);
+  connect(cmpsBtn3Dw, SIGNAL(clicked()), this, SLOT(cmpsBtn3DwClicked()));
+
+  cmpsBtn5Dw = new QToolButton(this);
+  cmpsAct5Dw = addWidget(cmpsBtn5Dw);
+  QToolTip::add(cmpsBtn5Dw, tr("5 Day w weekend trading"));
+  cmpsBtn5Dw->setToggleButton(TRUE);
+  connect(cmpsBtn5Dw, SIGNAL(clicked()), this, SLOT(cmpsBtn5DwClicked()));
+
+  cmpsBtn8Dw = new QToolButton(this);
+  cmpsAct8Dw = addWidget(cmpsBtn8Dw);
+  QToolTip::add(cmpsBtn8Dw, tr("8 Day w weekend trading"));
+  cmpsBtn8Dw->setToggleButton(TRUE);
+  connect(cmpsBtn8Dw, SIGNAL(clicked()), this, SLOT(cmpsBtn8DwClicked()));
 
   compressionChanged((BarData::BarLength) ti);
 
@@ -219,7 +394,7 @@ ChartToolbar::ChartToolbar(QMainWindow *mw) : QToolBar("chartToolbar", mw )
   a->insertItem(Qt::CTRL+Qt::Key_Plus, BarsLoadedFocus);
   a->insertItem(Qt::CTRL+Qt::Key_Minus, BarSpacingFocus);
   a->insertItem(Qt::CTRL+Qt::Key_Prior, BarLengthFocus);
-  a->insertItem(Qt::CTRL+Qt::Key_B, ToolbarFocus);
+  // a->insertItem(Qt::CTRL+Qt::Key_B, ToolbarFocus);
 
   focusFlag = BarLengthFocus;
 
@@ -321,60 +496,150 @@ void ChartToolbar::slotSetButtonView()
   if (tb) compressionCAction->setVisible(true);
   else compressionCAction->setVisible(false);
 
+  rcfile.loadData(RcFile::ShowCmpsCustomBarBtn, tb);
+  if (tb) cmpsActCustomBar->setVisible(true);
+  else cmpsActCustomBar->setVisible(false);
+  cmpsBtnCustomBar->setText("?s");
+
+  rcfile.loadData(RcFile::ShowCmps5SBtn, tb);
+  if (tb) cmpsAct5S->setVisible(true);
+  else cmpsAct5S->setVisible(false);
+  cmpsBtn5S->setText("5s");
+
+  rcfile.loadData(RcFile::ShowCmps10SBtn, tb);
+  if (tb) cmpsAct10S->setVisible(true);
+  else cmpsAct10S->setVisible(false);
+  cmpsBtn10S->setText("10s");
+
+  rcfile.loadData(RcFile::ShowCmps15SBtn, tb);
+  if (tb) cmpsAct15S->setVisible(true);
+  else cmpsAct15S->setVisible(false);
+  cmpsBtn15S->setText("15s");
+
+  rcfile.loadData(RcFile::ShowCmps20SBtn, tb);
+  if (tb) cmpsAct20S->setVisible(true);
+  else cmpsAct20S->setVisible(false);
+  cmpsBtn20S->setText("20s");
+
+  rcfile.loadData(RcFile::ShowCmps30SBtn, tb);
+  if (tb) cmpsAct30S->setVisible(true);
+  else cmpsAct30S->setVisible(false);
+  cmpsBtn30S->setText("30s");
+
+  rcfile.loadData(RcFile::ShowCmps45SBtn, tb);
+  if (tb) cmpsAct45S->setVisible(true);
+  else cmpsAct45S->setVisible(false);
+  cmpsBtn45S->setText("45s");
+
   rcfile.loadData(RcFile::ShowCmps1MBtn, tb);
   if (tb) cmpsAct1M->setVisible(true);
   else cmpsAct1M->setVisible(false);
-  cmpsBtn1M->setText("1M");
+  cmpsBtn1M->setText("1m");
 
-//  rcfile.loadData(RcFile::ShowCmps2MBtn, tb);
-//  if (tb) cmpsAct2M->setVisible(true);
-//  else cmpsAct2M->setVisible(false);
-//  cmpsBtn2M->setText("2M");
+  rcfile.loadData(RcFile::ShowCmps2MBtn, tb);
+  if (tb) cmpsAct2M->setVisible(true);
+  else cmpsAct2M->setVisible(false);
+  cmpsBtn2M->setText("2m");
+
+  rcfile.loadData(RcFile::ShowCmps3MBtn, tb);
+  if (tb) cmpsAct3M->setVisible(true);
+  else cmpsAct3M->setVisible(false);
+  cmpsBtn3M->setText("3m");
+
+  rcfile.loadData(RcFile::ShowCmps4MBtn, tb);
+  if (tb) cmpsAct4M->setVisible(true);
+  else cmpsAct4M->setVisible(false);
+  cmpsBtn4M->setText("4m");
 
   rcfile.loadData(RcFile::ShowCmps5MBtn, tb);
   if (tb) cmpsAct5M->setVisible(true);
   else cmpsAct5M->setVisible(false);
-  cmpsBtn5M->setText("5M");
+  cmpsBtn5M->setText("5m");
+
+  rcfile.loadData(RcFile::ShowCmps6MBtn, tb);
+  if (tb) cmpsAct6M->setVisible(true);
+  else cmpsAct6M->setVisible(false);
+  cmpsBtn6M->setText("6m");
 
   rcfile.loadData(RcFile::ShowCmps10MBtn, tb);
   if (tb) cmpsAct10M->setVisible(true);
   else cmpsAct10M->setVisible(false);
-  cmpsBtn10M->setText("10M");
+  cmpsBtn10M->setText("10m");
+
+  rcfile.loadData(RcFile::ShowCmps12MBtn, tb);
+  if (tb) cmpsAct12M->setVisible(true);
+  else cmpsAct12M->setVisible(false);
+  cmpsBtn12M->setText("12m");
 
   rcfile.loadData(RcFile::ShowCmps15MBtn, tb);
   if (tb) cmpsAct15M->setVisible(true);
   else cmpsAct15M->setVisible(false);
-  cmpsBtn15M->setText("15M");
+  cmpsBtn15M->setText("15m");
 
-//  rcfile.loadData(RcFile::ShowCmps20MBtn, tb);
-//  if (tb) cmpsAct20M->setVisible(true);
-//  else cmpsAct20M->setVisible(false);
-//  cmpsBtn20M->setText("20M");
+  rcfile.loadData(RcFile::ShowCmps20MBtn, tb);
+  if (tb) cmpsAct20M->setVisible(true);
+  else cmpsAct20M->setVisible(false);
+  cmpsBtn20M->setText("20m");
 
   rcfile.loadData(RcFile::ShowCmps30MBtn, tb);
   if (tb) cmpsAct30M->setVisible(true);
   else cmpsAct30M->setVisible(false);
-  cmpsBtn30M->setText("30M");
+  cmpsBtn30M->setText("30m");
+
+  rcfile.loadData(RcFile::ShowCmps45MBtn, tb);
+  if (tb) cmpsAct45M->setVisible(true);
+  else cmpsAct45M->setVisible(false);
+  cmpsBtn45M->setText("45m");
 
   rcfile.loadData(RcFile::ShowCmps1HBtn, tb);
   if (tb) cmpsAct1H->setVisible(true);
   else cmpsAct1H->setVisible(false);
-  cmpsBtn1H->setText("1H");
+  cmpsBtn1H->setText("1h");
 
-//  rcfile.loadData(RcFile::ShowCmps2HBtn, tb);
-//  if (tb) cmpsAct2H->setVisible(true);
-//  else cmpsAct2H->setVisible(false);
-//  cmpsBtn2H->setText("2H");
+  rcfile.loadData(RcFile::ShowCmps2HBtn, tb);
+  if (tb) cmpsAct2H->setVisible(true);
+  else cmpsAct2H->setVisible(false);
+  cmpsBtn2H->setText("2h");
 
-//  rcfile.loadData(RcFile::ShowCmps4HBtn, tb);
-//  if (tb) cmpsAct4H->setVisible(true);
-//  else cmpsAct4H->setVisible(false);
-//  cmpsBtn4H->setText("4H");
+  rcfile.loadData(RcFile::ShowCmps3HBtn, tb);
+  if (tb) cmpsAct3H->setVisible(true);
+  else cmpsAct3H->setVisible(false);
+  cmpsBtn3H->setText("3h");
+
+  rcfile.loadData(RcFile::ShowCmps4HBtn, tb);
+  if (tb) cmpsAct4H->setVisible(true);
+  else cmpsAct4H->setVisible(false);
+  cmpsBtn4H->setText("4h");
+
+  rcfile.loadData(RcFile::ShowCmps6HBtn, tb);
+  if (tb) cmpsAct6H->setVisible(true);
+  else cmpsAct6H->setVisible(false);
+  cmpsBtn6H->setText("6h");
+
+  rcfile.loadData(RcFile::ShowCmps8HBtn, tb);
+  if (tb) cmpsAct8H->setVisible(true);
+  else cmpsAct8H->setVisible(false);
+  cmpsBtn8H->setText("8h");
+
+  rcfile.loadData(RcFile::ShowCmps12HBtn, tb);
+  if (tb) cmpsAct12H->setVisible(true);
+  else cmpsAct12H->setVisible(false);
+  cmpsBtn12H->setText("12h");
 
   rcfile.loadData(RcFile::ShowCmps1DBtn, tb);
   if (tb) cmpsAct1D->setVisible(true);
   else cmpsAct1D->setVisible(false);
   cmpsBtn1D->setText("1D");
+
+  rcfile.loadData(RcFile::ShowCmps2DBtn, tb);
+  if (tb) cmpsAct2D->setVisible(true);
+  else cmpsAct2D->setVisible(false);
+  cmpsBtn2D->setText("2D");
+
+  rcfile.loadData(RcFile::ShowCmps3DBtn, tb);
+  if (tb) cmpsAct3D->setVisible(true);
+  else cmpsAct3D->setVisible(false);
+  cmpsBtn3D->setText("3D");
 
   rcfile.loadData(RcFile::ShowCmps1WBtn, tb);
   if (tb) cmpsAct1W->setVisible(true);
@@ -385,6 +650,26 @@ void ChartToolbar::slotSetButtonView()
   if (tb) cmpsActMN->setVisible(true);
   else cmpsActMN->setVisible(false);
   cmpsBtnMN->setText("MN");
+
+  rcfile.loadData(RcFile::ShowCmps2DwBtn, tb);
+  if (tb) cmpsAct2Dw->setVisible(true);
+  else cmpsAct2Dw->setVisible(false);
+  cmpsBtn2Dw->setText("2Dw");
+
+  rcfile.loadData(RcFile::ShowCmps3DwBtn, tb);
+  if (tb) cmpsAct3Dw->setVisible(true);
+  else cmpsAct3Dw->setVisible(false);
+  cmpsBtn3Dw->setText("3Dw");
+
+  rcfile.loadData(RcFile::ShowCmps5DwBtn, tb);
+  if (tb) cmpsAct5Dw->setVisible(true);
+  else cmpsAct5Dw->setVisible(false);
+  cmpsBtn5Dw->setText("5Dw");
+
+  rcfile.loadData(RcFile::ShowCmps8DwBtn, tb);
+  if (tb) cmpsAct8Dw->setVisible(true);
+  else cmpsAct8Dw->setVisible(false);
+  cmpsBtn8Dw->setText("8Dw");
 
   rcfile.loadData(RcFile::ShowBarSpSpinbox, tb);
   if (tb) pixelspaceAction->setVisible(true);
@@ -490,9 +775,16 @@ void ChartToolbar::doKeyPress(QKeyEvent *key)
         case Qt::Key_Minus:
 	  slotAccel(BarSpacingFocus);
           break;
-        case Qt::Key_B:
-	  slotAccel(ToolbarFocus);
-          break;
+   //      case Qt::Key_B:
+	  // slotAccel(ToolbarFocus);
+   //        break;
+        case Qt::Key_R:
+          if (watcherOn)
+            fileWatcherClicked(FALSE);
+          else
+            fileWatcherClicked(TRUE);
+    // slotAccel(ToggleReload);
+          break;          
         default:
           break;
       }
@@ -504,6 +796,16 @@ void ChartToolbar::barsChanged()
 {
   bool ok;
   int t = barCount->text().toInt(&ok);
+
+///
+ //just trying to store settings for "SYMBOL.cpp" to use
+  Config config;
+  QString ts2;
+  ts2 = QString::number(t);
+  // qDebug() << ts2;
+  config.setData(Config::Bars, ts2);
+///
+
   if (ok)
     emit signalBarsChanged(t);
 }
@@ -543,100 +845,288 @@ void ChartToolbar::ps3ButtonClicked()
   emit slotPixelspaceChanged(ti);
 }
 
-void ChartToolbar::cmpsBtn1MClicked()
+void ChartToolbar::cmpsBtnCustomBarClicked()
 {
   compressionCombo->setCurrentItem((BarData::BarLength)0);
   compressionChanged(0);
   emit signalBarLengthChanged((int)0);
 }
 
-//void ChartToolbar::cmpsBtn2MClicked()
-//{
-//}
-
-void ChartToolbar::cmpsBtn5MClicked()
+void ChartToolbar::cmpsBtn5SClicked()
 {
   compressionCombo->setCurrentItem((BarData::BarLength)1);
   compressionChanged(1);
   emit signalBarLengthChanged((int)1);
 }
 
-void ChartToolbar::cmpsBtn10MClicked()
+void ChartToolbar::cmpsBtn10SClicked()
 {
   compressionCombo->setCurrentItem((BarData::BarLength)2);
   compressionChanged(2);
   emit signalBarLengthChanged((int)2);
 }
 
-void ChartToolbar::cmpsBtn15MClicked()
+void ChartToolbar::cmpsBtn15SClicked()
 {
   compressionCombo->setCurrentItem((BarData::BarLength)3);
   compressionChanged(3);
   emit signalBarLengthChanged((int)3);
 }
 
-//void ChartToolbar::cmpsBtn20MClicked()
-//{
-//}
-
-void ChartToolbar::cmpsBtn30MClicked()
+void ChartToolbar::cmpsBtn20SClicked()
 {
   compressionCombo->setCurrentItem((BarData::BarLength)4);
   compressionChanged(4);
   emit signalBarLengthChanged((int)4);
 }
 
-void ChartToolbar::cmpsBtn1HClicked()
+void ChartToolbar::cmpsBtn30SClicked()
 {
   compressionCombo->setCurrentItem((BarData::BarLength)5);
   compressionChanged(5);
   emit signalBarLengthChanged((int)5);
 }
 
-//void ChartToolbar::cmpsBtn2HClicked()
-//{
-//}
-
-//void ChartToolbar::cmpsBtn4HClicked()
-//{
-//}
-
-void ChartToolbar::cmpsBtn1DClicked()
+void ChartToolbar::cmpsBtn45SClicked()
 {
   compressionCombo->setCurrentItem((BarData::BarLength)6);
   compressionChanged(6);
   emit signalBarLengthChanged((int)6);
 }
 
-void ChartToolbar::cmpsBtn1WClicked()
+void ChartToolbar::cmpsBtn1MClicked()
 {
   compressionCombo->setCurrentItem((BarData::BarLength)7);
   compressionChanged(7);
   emit signalBarLengthChanged((int)7);
 }
 
-void ChartToolbar::cmpsBtnMNClicked()
+void ChartToolbar::cmpsBtn2MClicked()
 {
   compressionCombo->setCurrentItem((BarData::BarLength)8);
   compressionChanged(8);
   emit signalBarLengthChanged((int)8);
 }
 
+void ChartToolbar::cmpsBtn3MClicked()
+{
+  compressionCombo->setCurrentItem((BarData::BarLength)9);
+  compressionChanged(9);
+  emit signalBarLengthChanged((int)9);
+}
+
+void ChartToolbar::cmpsBtn4MClicked()
+{
+  compressionCombo->setCurrentItem((BarData::BarLength)10);
+  compressionChanged(10);
+  emit signalBarLengthChanged((int)10);
+}
+
+void ChartToolbar::cmpsBtn5MClicked()
+{
+  compressionCombo->setCurrentItem((BarData::BarLength)11);
+  compressionChanged(11);
+  emit signalBarLengthChanged((int)11);
+}
+
+void ChartToolbar::cmpsBtn6MClicked()
+{
+  compressionCombo->setCurrentItem((BarData::BarLength)12);
+  compressionChanged(12);
+  emit signalBarLengthChanged((int)12);
+}
+
+void ChartToolbar::cmpsBtn10MClicked()
+{
+  compressionCombo->setCurrentItem((BarData::BarLength)13);
+  compressionChanged(13);
+  emit signalBarLengthChanged((int)13);
+}
+
+void ChartToolbar::cmpsBtn12MClicked()
+{
+  compressionCombo->setCurrentItem((BarData::BarLength)14);
+  compressionChanged(14);
+  emit signalBarLengthChanged((int)14);
+}
+
+void ChartToolbar::cmpsBtn15MClicked()
+{
+  compressionCombo->setCurrentItem((BarData::BarLength)15);
+  compressionChanged(15);
+  emit signalBarLengthChanged((int)15);
+}
+
+void ChartToolbar::cmpsBtn20MClicked()
+{
+  compressionCombo->setCurrentItem((BarData::BarLength)16);
+  compressionChanged(16);
+  emit signalBarLengthChanged((int)16);
+}
+
+void ChartToolbar::cmpsBtn30MClicked()
+{
+  compressionCombo->setCurrentItem((BarData::BarLength)17);
+  compressionChanged(17);
+  emit signalBarLengthChanged((int)17);
+}
+
+void ChartToolbar::cmpsBtn45MClicked()
+{
+  compressionCombo->setCurrentItem((BarData::BarLength)18);
+  compressionChanged(18);
+  emit signalBarLengthChanged((int)18);
+}
+
+void ChartToolbar::cmpsBtn1HClicked()
+{
+  compressionCombo->setCurrentItem((BarData::BarLength)19);
+  compressionChanged(19);
+  emit signalBarLengthChanged((int)19);
+}
+
+void ChartToolbar::cmpsBtn2HClicked()
+{
+  compressionCombo->setCurrentItem((BarData::BarLength)20);
+  compressionChanged(20);
+  emit signalBarLengthChanged((int)20);
+}
+
+void ChartToolbar::cmpsBtn3HClicked()
+{
+  compressionCombo->setCurrentItem((BarData::BarLength)21);
+  compressionChanged(21);
+  emit signalBarLengthChanged((int)21);
+}
+
+void ChartToolbar::cmpsBtn4HClicked()
+{
+  compressionCombo->setCurrentItem((BarData::BarLength)22);
+  compressionChanged(22);
+  emit signalBarLengthChanged((int)22);
+}
+
+void ChartToolbar::cmpsBtn6HClicked()
+{
+  compressionCombo->setCurrentItem((BarData::BarLength)23);
+  compressionChanged(23);
+  emit signalBarLengthChanged((int)23);
+}
+
+void ChartToolbar::cmpsBtn8HClicked()
+{
+  compressionCombo->setCurrentItem((BarData::BarLength)24);
+  compressionChanged(24);
+  emit signalBarLengthChanged((int)24);
+}
+
+void ChartToolbar::cmpsBtn12HClicked()
+{
+  compressionCombo->setCurrentItem((BarData::BarLength)25);
+  compressionChanged(25);
+  emit signalBarLengthChanged((int)25);
+}
+
+void ChartToolbar::cmpsBtn1DClicked()
+{
+  compressionCombo->setCurrentItem((BarData::BarLength)26);
+  compressionChanged(26);
+  emit signalBarLengthChanged((int)26);
+}
+
+void ChartToolbar::cmpsBtn2DClicked()
+{
+  compressionCombo->setCurrentItem((BarData::BarLength)27);
+  compressionChanged(27);
+  emit signalBarLengthChanged((int)27);
+}
+
+void ChartToolbar::cmpsBtn3DClicked()
+{
+  compressionCombo->setCurrentItem((BarData::BarLength)28);
+  compressionChanged(28);
+  emit signalBarLengthChanged((int)28);
+}
+
+void ChartToolbar::cmpsBtn1WClicked()
+{
+  compressionCombo->setCurrentItem((BarData::BarLength)29);
+  compressionChanged(29);
+  emit signalBarLengthChanged((int)29);
+}
+
+void ChartToolbar::cmpsBtnMNClicked()
+{
+  compressionCombo->setCurrentItem((BarData::BarLength)30);
+  compressionChanged(30);
+  emit signalBarLengthChanged((int)30);
+}
+
+void ChartToolbar::cmpsBtn2DwClicked()
+{
+  compressionCombo->setCurrentItem((BarData::BarLength)31);
+  compressionChanged(31);
+  emit signalBarLengthChanged((int)31);
+}
+
+void ChartToolbar::cmpsBtn3DwClicked()
+{
+  compressionCombo->setCurrentItem((BarData::BarLength)32);
+  compressionChanged(32);
+  emit signalBarLengthChanged((int)32);
+}
+
+void ChartToolbar::cmpsBtn5DwClicked()
+{
+  compressionCombo->setCurrentItem((BarData::BarLength)33);
+  compressionChanged(33);
+  emit signalBarLengthChanged((int)33);
+}
+
+void ChartToolbar::cmpsBtn8DwClicked()
+{
+  compressionCombo->setCurrentItem((BarData::BarLength)34);
+  compressionChanged(34);
+  emit signalBarLengthChanged((int)34);
+}
+
 void ChartToolbar::compressionChanged(int compression)
 {
-  compression == 0 ? cmpsBtn1M->setOn(TRUE) : cmpsBtn1M->setOn(FALSE);
-//  compression == 1 ? cmpsBtn2M->setOn(TRUE) : cmpsBtn2M->setOn(FALSE);
-  compression == 1 ? cmpsBtn5M->setOn(TRUE) : cmpsBtn5M->setOn(FALSE);
-  compression == 2 ? cmpsBtn10M->setOn(TRUE) : cmpsBtn10M->setOn(FALSE);
-  compression == 3 ? cmpsBtn15M->setOn(TRUE) : cmpsBtn15M->setOn(FALSE);
-//  compression == 4 ? cmpsBtn20M->setOn(TRUE) : cmpsBtn20M->setOn(FALSE);
-  compression == 4 ? cmpsBtn30M->setOn(TRUE) : cmpsBtn30M->setOn(FALSE);
-  compression == 5 ? cmpsBtn1H->setOn(TRUE) : cmpsBtn1H->setOn(FALSE);
-//  compression == 5 ? cmpsBtn2H->setOn(TRUE) : cmpsBtn2H->setOn(FALSE);
-//  compression == 5 ? cmpsBtn4H->setOn(TRUE) : cmpsBtn4H->setOn(FALSE);
-  compression == 6 ? cmpsBtn1D->setOn(TRUE) : cmpsBtn1D->setOn(FALSE);
-  compression == 7 ? cmpsBtn1W->setOn(TRUE) : cmpsBtn1W->setOn(FALSE);
-  compression == 8 ? cmpsBtnMN->setOn(TRUE) : cmpsBtnMN->setOn(FALSE);
+  compression == 0 ? cmpsBtnCustomBar->setOn(TRUE) : cmpsBtnCustomBar->setOn(FALSE);
+  compression == 1 ? cmpsBtn5S->setOn(TRUE) : cmpsBtn5S->setOn(FALSE);
+  compression == 2 ? cmpsBtn10S->setOn(TRUE) : cmpsBtn10S->setOn(FALSE);
+  compression == 3 ? cmpsBtn15S->setOn(TRUE) : cmpsBtn15S->setOn(FALSE);
+  compression == 4 ? cmpsBtn20S->setOn(TRUE) : cmpsBtn20S->setOn(FALSE);
+  compression == 5 ? cmpsBtn30S->setOn(TRUE) : cmpsBtn30S->setOn(FALSE);
+  compression == 6 ? cmpsBtn45S->setOn(TRUE) : cmpsBtn45S->setOn(FALSE);
+  compression == 7 ? cmpsBtn1M->setOn(TRUE) : cmpsBtn1M->setOn(FALSE);
+  compression == 8 ? cmpsBtn2M->setOn(TRUE) : cmpsBtn2M->setOn(FALSE);
+  compression == 9 ? cmpsBtn3M->setOn(TRUE) : cmpsBtn3M->setOn(FALSE);
+  compression == 10 ? cmpsBtn4M->setOn(TRUE) : cmpsBtn4M->setOn(FALSE);
+  compression == 11 ? cmpsBtn5M->setOn(TRUE) : cmpsBtn5M->setOn(FALSE);
+  compression == 12 ? cmpsBtn6M->setOn(TRUE) : cmpsBtn6M->setOn(FALSE);
+  compression == 13 ? cmpsBtn10M->setOn(TRUE) : cmpsBtn10M->setOn(FALSE);
+  compression == 14 ? cmpsBtn12M->setOn(TRUE) : cmpsBtn12M->setOn(FALSE);
+  compression == 15 ? cmpsBtn15M->setOn(TRUE) : cmpsBtn15M->setOn(FALSE);
+  compression == 16 ? cmpsBtn20M->setOn(TRUE) : cmpsBtn20M->setOn(FALSE);
+  compression == 17 ? cmpsBtn30M->setOn(TRUE) : cmpsBtn30M->setOn(FALSE);
+  compression == 18 ? cmpsBtn45M->setOn(TRUE) : cmpsBtn45M->setOn(FALSE);
+  compression == 19 ? cmpsBtn1H->setOn(TRUE) : cmpsBtn1H->setOn(FALSE);
+  compression == 20 ? cmpsBtn2H->setOn(TRUE) : cmpsBtn2H->setOn(FALSE);
+  compression == 21 ? cmpsBtn3H->setOn(TRUE) : cmpsBtn3H->setOn(FALSE);
+  compression == 22 ? cmpsBtn4H->setOn(TRUE) : cmpsBtn4H->setOn(FALSE);
+  compression == 23 ? cmpsBtn6H->setOn(TRUE) : cmpsBtn6H->setOn(FALSE);
+  compression == 24 ? cmpsBtn8H->setOn(TRUE) : cmpsBtn8H->setOn(FALSE);
+  compression == 25 ? cmpsBtn12H->setOn(TRUE) : cmpsBtn12H->setOn(FALSE);
+  compression == 26 ? cmpsBtn1D->setOn(TRUE) : cmpsBtn1D->setOn(FALSE);
+  compression == 27 ? cmpsBtn2D->setOn(TRUE) : cmpsBtn2D->setOn(FALSE);
+  compression == 28 ? cmpsBtn3D->setOn(TRUE) : cmpsBtn3D->setOn(FALSE);
+  compression == 29 ? cmpsBtn1W->setOn(TRUE) : cmpsBtn1W->setOn(FALSE);
+  compression == 30 ? cmpsBtnMN->setOn(TRUE) : cmpsBtnMN->setOn(FALSE);
+  compression == 31 ? cmpsBtn2Dw->setOn(TRUE) : cmpsBtn2Dw->setOn(FALSE);
+  compression == 32 ? cmpsBtn3Dw->setOn(TRUE) : cmpsBtn3Dw->setOn(FALSE);
+  compression == 33 ? cmpsBtn5Dw->setOn(TRUE) : cmpsBtn5Dw->setOn(FALSE);
+  compression == 34 ? cmpsBtn8Dw->setOn(TRUE) : cmpsBtn8Dw->setOn(FALSE);
 }
 
 void ChartToolbar::slotOrientationChanged(Qt::Orientation o)
@@ -663,6 +1153,51 @@ void ChartToolbar::slotPixelspaceChanged(int ps)
   if (ps == ps3ButtonText)
     ps3Button->setOn(TRUE);
 }
+
+
+// void ChartToolbar::refreshTimerClicked(bool d)
+// {
+//   if (d) {
+//     refreshTimer->start(2000);
+//     refresh();
+//   }
+//   else {
+//     refreshTimer->stop();
+//   }
+// }
+
+void ChartToolbar::slotDifferentFile(QString selection)
+{
+  watcher->removePaths(watcher->files());
+  watcher->addPath(selection);
+}
+
+void ChartToolbar::fileWatcherClicked(bool d)
+{
+  //set flag to see if we should refresh or not
+  if (d)
+  {
+    watcherOn = TRUE;
+    refresh();
+  }
+  else watcherOn = FALSE;
+}
+
+void ChartToolbar::slotFileModDetected()
+{
+  if (watcherOn) refresh();
+}
+
+
+void ChartToolbar::refresh()
+{
+    if (!ptdAction->isVisible())
+      emit signalPaperTradeNextBar();
+    else
+      paperTradeNextBar();
+}
+
+
 
 //*********************************************************************
 //******************** paper trade stuff ******************************
@@ -692,8 +1227,7 @@ void ChartToolbar::paperTradeDate()
     QDateTime dt;
     dialog->getDate(dl, dt);
     ptDate.setDate(dt.date());
-
-    dialog->getDate(tl, dt);
+    dialog->getTime(tl, dt); //bug: wasn't setting time
     ptDate.setTime(dt.time());
 
     emit signalPaperTradeNextBar();
@@ -723,45 +1257,73 @@ void ChartToolbar::paperTradeNextBar()
   if (!ptdAction->isVisible())
     return;
 
+  // if (refreshTimer->isActive())
+  //   ptDate = ptDate.addSecs(5);
+  // else {
   switch (compressionCombo->currentItem())
-  {
-    case 0:
-      ptDate = ptDate.addSecs(60);
-      break;
-    case 1:
-      ptDate = ptDate.addSecs(300);
-      break;
-    case 2:
-      ptDate = ptDate.addSecs(600);
-      break;
-    case 3:
-      ptDate = ptDate.addSecs(900);
-      break;
-    case 4:
-      ptDate = ptDate.addSecs(1800);
-      break;
-    case 5:
-      ptDate = ptDate.addSecs(3600);
-      break;
-    case 6: // daily
-      ptDate = ptDate.addDays(1);
-      if (ptDate.date().dayOfWeek() == 6)
-        ptDate = ptDate.addDays(2);
-      else
-      {
-        if (ptDate.date().dayOfWeek() == 7)
-          ptDate = ptDate.addDays(1);
-      }
-      break;
-    case 7: // weekly
-      ptDate = ptDate.addDays(7);
-      break;
-    case 8: // monthly
-      ptDate = ptDate.addMonths(1);
-      break;
-    default:
-      break;
-  }
+    {
+      case 0:
+        ptDate = ptDate.addSecs(1);
+        break;
+      case 1:
+      case 2:
+      case 3:
+      case 4:
+        ptDate = ptDate.addSecs(5*compressionCombo->currentItem());
+        break;
+      case 5:
+        ptDate = ptDate.addSecs(30);
+        break;
+      case 6:
+        ptDate = ptDate.addSecs(45);
+        break;
+      case 7:
+      case 8:
+      case 9:
+      case 10:
+      case 11:
+      case 12:
+        ptDate = ptDate.addSecs((compressionCombo->currentItem()-6)*60);
+        break;
+      case 13:
+        ptDate = ptDate.addSecs(600);
+        break;
+      case 14:
+        ptDate = ptDate.addSecs(720);
+        break;
+      case 15:
+        ptDate = ptDate.addSecs(900);
+        break;
+      case 17:
+        ptDate = ptDate.addSecs(1800);
+        break; 
+      // case 15: // daily
+      //   ptDate = ptDate.addDays(1);
+      //   if (ptDate.date().dayOfWeek() == 6)
+      //     ptDate = ptDate.addDays(2);
+      //   else
+      //   {
+      //     if (ptDate.date().dayOfWeek() == 7)
+      //       ptDate = ptDate.addDays(1);
+      //   }
+      //   break;
+      case 29: // weekly
+        ptDate = ptDate.addDays(7);
+        break;
+      case 30: // monthly
+        ptDate = ptDate.addMonths(1);
+        break;
+      default: //default to daily
+        ptDate = ptDate.addDays(1);
+        if (ptDate.date().dayOfWeek() == 6)
+          ptDate = ptDate.addDays(2);
+        else
+        {
+          if (ptDate.date().dayOfWeek() == 7)
+            ptDate = ptDate.addDays(1);
+        }
+        break;
+    }
 
   emit signalPaperTradeNextBar();
 }

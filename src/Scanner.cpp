@@ -40,6 +40,7 @@
 #include "HelpWindow.h"
 #include "Traverse.h"
 
+// #include "qdebug.h"
 
 Scanner::Scanner (QString n, DBIndex *i) : Q3TabDialog (0, 0, FALSE)
 {
@@ -215,6 +216,11 @@ void Scanner::scan ()
     db.setBarLength((BarData::BarLength) barLengthList.findIndex(period->currentText()));
 
     BarData *recordList = new BarData(fileList[loop]);
+
+// compression bug, recordList was not updated
+recordList->setBarLength((BarData::BarLength) barLengthList.findIndex(period->currentText()));
+// qDebug() << recordList->getBarLength();
+
     QDateTime dt = QDateTime::currentDateTime();
     db.getHistory(recordList, dt);
     db.close();
@@ -232,6 +238,7 @@ void Scanner::scan ()
     PlotLine *line = i->getLine(0);
     if (line && line->getSize() > 0)
     {
+      // qDebug() << line->getData(line->getSize() - 1);
       if ((line->getData(line->getSize() - 1) > 0) && (! fileList[loop].contains( '^', FALSE )))
       {
         QString ts;

@@ -29,13 +29,14 @@
 #include <qdatetime.h>
 //Added by qt3to4:
 #include <QPixmap>
+// #include <vector>
 
 class TrendLine : public COBase
 {
   Q_OBJECT
 
   public:
-    TrendLine ();
+    TrendLine (int);
     ~TrendLine ();
     void draw (QPixmap &, Scaler &, int, int, int);
     void newObject (QString &, QString &);
@@ -52,9 +53,12 @@ class TrendLine : public COBase
     double getValue2 ();
     int isGrabSelected (QPoint point);
     bool getUseBar ();
+    bool getAutoBar ();
     void getBar (QString &);
     bool getExtend ();
+    bool getFan ();
     void adjustForSplit (QDateTime &, double);
+
 
   public slots:
     void prefDialog ();
@@ -63,7 +67,9 @@ class TrendLine : public COBase
 
   protected:
     bool usebar;
+    bool autobar;
     bool extend;
+    bool fan;
     QString bar;
     int moveFlag;
     QDateTime tx;
@@ -77,8 +83,11 @@ class TrendLine : public COBase
     QString evalueLabel;
     QString fieldLabel;
     QString usebarLabel;
+    QString autobarLabel;
     QString extendLabel;
-
+    QString fanLabel;
+    int interval;
+    QString intervalLabel;
 };
 
 #endif
