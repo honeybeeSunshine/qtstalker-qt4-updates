@@ -32,7 +32,7 @@ https://launchpad.net/~gezakovacs/+archive/ubuntu/ppa/
 
 You will also need TA-lib, and BerkeleyDB.
 
-I used Qt 4.8.7 and libdb5.3.28-13. You can ignore the warning about needing Berkeley > 4.x
+I used Qt 4.8.7 and libdb5.3.28-13.
 
 
 Usage

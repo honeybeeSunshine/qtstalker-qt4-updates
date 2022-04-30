@@ -18,7 +18,7 @@ void Dependencies::initTestCase()
 
 void Dependencies::berkeleyDbVersion()
 {
-  int requiredMajor = 4;
+  int requiredMajor = 5;
   # ifdef Q_OS_FREEBSD
     int requiredMinor = 3;
   # else
